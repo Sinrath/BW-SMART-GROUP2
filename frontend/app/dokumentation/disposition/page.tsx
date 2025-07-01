@@ -1,7 +1,10 @@
-export default function Amortisation() {
+export default function DispositionPage() {
     return (
-        <div>
-            <h1 className="bg-pink-400 font-semibold mb-4">Dashboard</h1>
+        <div className="w-full h-screen">
+            <iframe
+                src="/G2_Smart_Living_Disposition.pdf"
+                className="w-full h-full"
+            />
         </div>
     );
 }
