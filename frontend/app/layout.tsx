@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger, } from "@/components/ui/sidebar";
 import { BreadcrumbPlain } from "@/components/BreadcrumbPlain";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
     title: "Dashboard",
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: Readonly<{
                 </header>
                 <main className="flex flex-1 flex-col gap-4 p-4">
                     { children }
+                    <Toaster richColors />
                 </main>
             </SidebarInset>
         </SidebarProvider>
