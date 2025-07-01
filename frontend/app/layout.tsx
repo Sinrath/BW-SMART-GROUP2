@@ -4,7 +4,7 @@ import "./globals.css";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger, } from "@/components/ui/sidebar";
-import { BreadcrumbPlain } from "@/components/DynamicBreadcrumb";
+import { BreadcrumbPlain } from "@/components/BreadcrumbPlain";
 
 export const metadata: Metadata = {
     title: "Dashboard",
