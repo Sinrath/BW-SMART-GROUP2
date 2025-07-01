@@ -32,5 +32,5 @@ The SQLite database stores:
 - Period (year)
 - Canton (1-26)
 - Canton label (name)
-- Category (C1-C7)
+- Category (C2 = 30’000 kWh/year, C3 = 150’000 kWh/year)
 - Price components: aidfee, charge, gridusage, energy, total
