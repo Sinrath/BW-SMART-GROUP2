@@ -5,17 +5,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/co
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { TriangleAlert } from "lucide-react"
 
-import { FilterPanel } from "@/components/filter-panel"
-import { TrendChart } from "@/components/trend-chart"
-import { ComponentChart } from "@/components/component-chart"
+import { FilterPanel } from "@/components/strompreise/filter-panel"
+import { TrendChart } from "@/components/strompreise/trend-chart"
+import { ComponentChart } from "@/components/strompreise/component-chart"
 import { DEMO } from "@/app/fakeData"
-
-export type Cat = "C2" | "C3"
+import { Cat } from "@/app/types/categories";
+import { PriceSpreadChart } from "@/components/strompreise/price-spread-chart";
+import { RadarCard } from "@/components/strompreise/radar-chart";
 
 export default function StrompreisExplorerPage() {
     /* ─── State ─────────────────────────────────────────── */
-    const [ cantons, setCantons ] = React.useState<string[]>([ "ZH", "BE" ])
-    const [ category, setCategory ] = React.useState<Cat>("C2")
+    const [ cantons, setCantons ] = React.useState<string[]>(() => {
+        return JSON.parse(localStorage.getItem("cantons") ?? '["ZH"]')
+    })
+    const [ category, setCategory ] = React.useState<Cat>(() => {
+        return (localStorage.getItem("category") as Cat) ?? "C2"
+    })
+
+    /* Speichern, sobald sich etwas ändert */
+    React.useEffect(() => {
+        localStorage.setItem("cantons", JSON.stringify(cantons))
+    }, [ cantons ])
+
+    React.useEffect(() => {
+        localStorage.setItem("category", category)
+    }, [ category ])
 
     /* ─── 1) nur Kantone, die echte Daten haben ─────────── */
     const validCantons = cantons.filter((c) => DEMO[c])
@@ -138,6 +152,22 @@ export default function StrompreisExplorerPage() {
                             ) }
                         </CardContent>
                     </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Komponenten-Entwicklung&nbsp;2024&nbsp;
+                                { validCantons.length === 1
+                                    ? `(${ validCantons[0] })`
+                                    : `(${ validCantons.length } Kantone Ø)` }
+                            </CardTitle>
+                            <CardDescription>Absolute Werte in Rp./kWh</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <PriceSpreadChart cantons={ validCantons } category={ category } />
+                        </CardContent>
+                    </Card>
+
+                    <RadarCard cantons={ validCantons } category={ category } />
                 </div>
             ) }
         </div>

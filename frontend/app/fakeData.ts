@@ -1,4 +1,4 @@
-import { Cat } from "@/app/tool/strompreise/page";
+import { Cat } from "@/app/types/categories";
 
 export const DEMO: Record<string, Record<Cat, {
     trend: { year: number; total: number }[]

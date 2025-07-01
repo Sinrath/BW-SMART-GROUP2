@@ -14,7 +14,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ChevronDown } from "lucide-react"
 
 import { toast } from "sonner"              //  ←  Sonner-Toast
-import { DEMO } from "@/app/fakeData"       //  dein Demo-Datensatz
+import { DEMO } from "@/app/fakeData"
+import { Cat } from "@/app/types/categories";       //  dein Demo-Datensatz
 
 /* Kantone A–Z */
 const cantonList = [
@@ -27,8 +28,8 @@ export function FilterPanel({
                             }: {
     cantons: string[]
     onCantonsChange: (c: string[]) => void
-    category: "C2" | "C3"
-    onCategoryChange: (c: "C2" | "C3") => void
+    category: Cat
+    onCategoryChange: (c: Cat) => void
 }) {
     /* Umschalten eines Kantons */
     const toggleCanton = (c: string) => {
@@ -84,7 +85,7 @@ export function FilterPanel({
                     <Label>Kategorie</Label>
                     <RadioGroup
                         value={category}
-                        onValueChange={(val) => onCategoryChange(val as "C2" | "C3")}
+                        onValueChange={(val) => onCategoryChange(val as Cat)}
                         className="flex gap-6"
                     >
                         <div className="flex items-center gap-2">
