@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import {
     Sidebar,
@@ -13,6 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { SidebarSectionTitle } from "@/components/SidebarTitle";
 import { Book } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const navMain = [
     {
@@ -36,6 +39,8 @@ const navMain = [
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const pathname = usePathname()
+
     return (
         <Sidebar { ...props }>
             <SidebarHeader>
@@ -52,13 +57,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <SidebarGroupLabel>{ item.title }</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
-                                { item.items.map((item) => (
-                                    <SidebarMenuItem key={ item.title }>
-                                        <SidebarMenuButton asChild isActive={ item.isActive }>
-                                            <a href={ item.url }>{ item.title }</a>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                )) }
+                                { item.items.map((subItem) => {
+                                    const isActive = pathname === subItem.url
+                                    return (
+                                        <SidebarMenuItem key={ subItem.title }>
+                                            <SidebarMenuButton asChild isActive={ isActive }>
+                                                <a href={ subItem.url }>{ subItem.title }</a>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    )
+                                }) }
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>
