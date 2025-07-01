@@ -1,5 +1,43 @@
 # BW-SMART-GROUP2
 
+## Technology Stack
+
+### Frontend
+
+- **Framework**: Next.js
+- **Sprache**: TypeScript
+- **Styling**: Tailwind CSS
+- **Package Manager**: npm
+
+### Backend
+
+- **Framework**: Flask
+- **Sprache**: Python
+- **Datenbank**: SQLite
+- **ORM**: Flask-SQLAlchemy
+- **API-Kommunikation**:
+  - Flask-CORS (Cross-Origin Resource Sharing)
+  - Requests (für externe API-Aufrufe)
+- **Virtuelle Umgebung**: venv
+
+### Datenquelle
+
+- **Externe API**: ElCom Strompreis API (GraphQL)
+- **Endpunkt**: https://www.strompreis.elcom.admin.ch/api/graphql
+
+### Projekt-Struktur
+
+```
+/
+├── frontend/         # Next.js Applikation
+│   ├── app/          # App Router
+│   └── node_modules/ # JavaScript Dependencies
+│
+└── backend/          # Flask API Server
+    ├── venv/         # Python Virtual Environment
+    └── instance/     # SQLite Datenbank
+```
+
 # Electricity Price Data Management
 
 ## Setup Database
