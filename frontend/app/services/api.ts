@@ -142,6 +142,14 @@ export class ApiService {
   transformToFakeDataStructure(records: ElectricityPriceRecord[]): ElectricityData {
     const result: ElectricityData = {};
     
+    // Group records by category for debugging
+    const byCategory = records.reduce((acc, record) => {
+      if (!acc[record.category]) acc[record.category] = 0;
+      acc[record.category]++;
+      return acc;
+    }, {} as Record<string, number>);
+    console.log('Records by category:', byCategory);
+    
     records.forEach(record => {
       const cantonAbbr = CANTON_CODE_MAP[record.canton] || record.canton;
       

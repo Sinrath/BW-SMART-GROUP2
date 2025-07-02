@@ -22,11 +22,16 @@ export function useElectricityData(): UseElectricityDataReturn {
       setLoading(true);
       setError(null);
       
-      const [pricesData, cantonsData, yearsData] = await Promise.all([
-        apiService.getPrices(),
+      // Fetch data for both C2 and C3 categories
+      const [pricesC2, pricesC3, cantonsData, yearsData] = await Promise.all([
+        apiService.getPrices(undefined, undefined, 'C2'),
+        apiService.getPrices(undefined, undefined, 'C3'),
         apiService.getCantons(),
         apiService.getYears()
       ]);
+      
+      // Combine both C2 and C3 data
+      const pricesData = [...pricesC2, ...pricesC3];
       
       const transformedData = apiService.transformToFakeDataStructure(pricesData);
       

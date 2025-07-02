@@ -63,16 +63,41 @@ export default function StrompreisExplorerPage() {
     }
 
     /* ─── 1) nur Kantone, die echte Daten haben ─────────── */
-    const validCantons = cantons.filter((c) => DEMO[c as keyof typeof DEMO])
+    const validCantons = cantons.filter((c) => {
+        const cantonData = DEMO[c as keyof typeof DEMO]
+        const categoryData = cantonData?.[category]
+        // Check if we have both trend data and comp24 data
+        const hasData = categoryData && categoryData.trend && categoryData.trend.length > 0
+        return hasData
+    })
     const hasSelection = validCantons.length > 0
 
     /* ─── 2) Trend-Daten zusammenführen ─────────────────── */
-    const years = DEMO.ZH?.C2?.trend?.map((d) => d.year) || []         // gemeinsame X-Achse
+    const years = (() => {
+        // Get years from the first valid canton/category combination
+        for (const canton of validCantons) {
+            const categoryData = DEMO[canton as keyof typeof DEMO]?.[category];
+            if (categoryData?.trend?.length > 0) {
+                return categoryData.trend.map((d) => d.year);
+            }
+        }
+        // Fallback: get years from any available data
+        for (const cantonKey of Object.keys(DEMO)) {
+            for (const catKey of Object.keys(DEMO[cantonKey])) {
+                const trend = DEMO[cantonKey][catKey]?.trend;
+                if (trend?.length > 0) {
+                    return trend.map((d) => d.year);
+                }
+            }
+        }
+        return [];
+    })();
     const trendData = hasSelection
         ? years.map((year) => {
             const obj: {year: number; [key: string]: number | undefined} = { year }
             validCantons.forEach((c) => {
-                obj[c] = DEMO[c as keyof typeof DEMO][category].trend.find((t) => t.year === year)?.total
+                const trend = DEMO[c as keyof typeof DEMO]?.[category]?.trend
+                obj[c] = trend?.find((t) => t.year === year)?.total
             })
             return obj
         })
@@ -89,11 +114,13 @@ export default function StrompreisExplorerPage() {
     if (hasSelection) {
         const sum = validCantons.reduce(
             (acc, c) => {
-                const d = DEMO[c as keyof typeof DEMO][category].comp24
-                acc.aidfee += d.aidfee
-                acc.charge += d.charge
-                acc.gridusage += d.gridusage
-                acc.energy += d.energy
+                const d = DEMO[c as keyof typeof DEMO]?.[category]?.comp24
+                if (d) {
+                    acc.aidfee += d.aidfee || 0
+                    acc.charge += d.charge || 0
+                    acc.gridusage += d.gridusage || 0
+                    acc.energy += d.energy || 0
+                }
                 return acc
             },
             { aidfee: 0, charge: 0, gridusage: 0, energy: 0 }
@@ -138,7 +165,10 @@ export default function StrompreisExplorerPage() {
                 <Alert>
                     <TriangleAlert className="h-4 w-4" />
                     <AlertDescription>
-                        Bitte mindestens einen Kanton auswählen.
+                        {cantons.length > 0 
+                            ? `Keine Daten für ${category} in den ausgewählten Kantonen (${cantons.join(', ')}) verfügbar.`
+                            : "Bitte mindestens einen Kanton auswählen."
+                        }
                     </AlertDescription>
                 </Alert>
             ) }

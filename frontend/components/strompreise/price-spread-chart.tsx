@@ -23,7 +23,25 @@ export function PriceSpreadChart({
     const { data: DEMO } = useElectricityData()
     if (!cantons.length || !DEMO || Object.keys(DEMO).length === 0) return null
 
-    const years = DEMO.ZH?.C2?.trend?.map((d) => d.year) || []
+    // Get years from the first available canton/category combination
+    const years = (() => {
+        for (const canton of cantons) {
+            const categoryData = DEMO[canton]?.[category];
+            if (categoryData?.trend?.length > 0) {
+                return categoryData.trend.map((d) => d.year);
+            }
+        }
+        // Fallback: get years from any available data
+        for (const cantonKey of Object.keys(DEMO)) {
+            for (const catKey of Object.keys(DEMO[cantonKey])) {
+                const trend = DEMO[cantonKey][catKey]?.trend;
+                if (trend?.length > 0) {
+                    return trend.map((d) => d.year);
+                }
+            }
+        }
+        return [];
+    })();
 
     /* Min/Max/Ø je Jahr berechnen */
     const data = years.map((year) => {

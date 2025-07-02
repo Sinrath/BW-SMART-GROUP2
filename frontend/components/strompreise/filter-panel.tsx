@@ -22,11 +22,17 @@ export function FilterPanel({
     onCategoryChange: (c: Cat) => void
 }) {
     const { data: DEMO, cantons: availableCantons } = useElectricityData()
+    
+    // Filter cantons that have data for the selected category
+    const cantonsWithData = availableCantons.filter(canton => {
+        return DEMO[canton.code] && DEMO[canton.code][category]
+    })
+    
     /* Umschalten eines Kantons */
     const toggleCanton = (c: string) => {
-        if (!DEMO[c]) {
+        if (!DEMO[c] || !DEMO[c][category]) {
             /* Fehl-Toast & Abbruch */
-            toast.error(`Für «${ c }» liegen derzeit keine Daten vor.`)
+            toast.error(`Für «${ c }» liegen derzeit keine ${category} Daten vor.`)
             return
         }
         onCantonsChange(
@@ -55,7 +61,7 @@ export function FilterPanel({
                         <PopoverContent className="p-0 w-56">
                             <ScrollArea className="h-60">
                                 <div className="p-2 space-y-1">
-                                    { availableCantons.map((canton) => (
+                                    { cantonsWithData.map((canton) => (
                                         <div
                                             key={ canton.code }
                                             className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted/50"
