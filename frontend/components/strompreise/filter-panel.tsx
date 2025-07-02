@@ -1,11 +1,7 @@
 "use client"
 
-import {
-    Card, CardContent, CardHeader, CardTitle,
-} from "@/components/ui/card"
-import {
-    Popover, PopoverTrigger, PopoverContent,
-} from "@/components/ui/popover"
+import { Card, CardContent, CardHeader, CardTitle, } from "@/components/ui/card"
+import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -13,15 +9,9 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ChevronDown } from "lucide-react"
 
-import { toast } from "sonner"              //  ←  Sonner-Toast
-import { DEMO } from "@/app/fakeData"
-import { Cat } from "@/app/types/categories";       //  dein Demo-Datensatz
-
-/* Kantone A–Z */
-const cantonList = [
-    "AG","AI","AR","BE","BL","BS","FR","GE","GL","GR","JU","LU","NE","NW","OW",
-    "SG","SH","SO","SZ","TG","TI","UR","VD","VS","ZG","ZH",
-]
+import { toast } from "sonner" //  ←  Sonner-Toast
+import { CANTON_LIST, DEMO } from "@/app/fakeData"
+import { Cat } from "@/app/types/categories"; //  dein Demo-Datensatz
 
 export function FilterPanel({
                                 cantons, onCantonsChange, category, onCategoryChange,
@@ -35,11 +25,11 @@ export function FilterPanel({
     const toggleCanton = (c: string) => {
         if (!DEMO[c]) {
             /* Fehl-Toast & Abbruch */
-            toast.error(`Für «${c}» liegen derzeit keine Daten vor.`)
+            toast.error(`Für «${ c }» liegen derzeit keine Daten vor.`)
             return
         }
         onCantonsChange(
-            cantons.includes(c) ? cantons.filter((x) => x !== c) : [...cantons, c],
+            cantons.includes(c) ? cantons.filter((x) => x !== c) : [ ...cantons, c ],
         )
     }
 
@@ -50,13 +40,13 @@ export function FilterPanel({
             </CardHeader>
 
             <CardContent className="flex flex-col gap-6 pt-4">
-                {/* Kanton MultiSelect */}
+                {/* Kanton MultiSelect */ }
                 <div className="space-y-2">
                     <Label>Kanton(e)</Label>
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="outline" className="w-56 justify-between">
-                                {cantons.length ? cantons.join(", ") : "Bitte wählen"}
+                                { cantons.length ? cantons.join(", ") : "Bitte wählen" }
                                 <ChevronDown className="ml-2 size-4" />
                             </Button>
                         </PopoverTrigger>
@@ -64,28 +54,28 @@ export function FilterPanel({
                         <PopoverContent className="p-0 w-56">
                             <ScrollArea className="h-60">
                                 <div className="p-2 space-y-1">
-                                    {cantonList.map((c) => (
+                                    { CANTON_LIST.map((c) => (
                                         <div
-                                            key={c}
+                                            key={ c }
                                             className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted/50"
-                                            onClick={() => toggleCanton(c)}
+                                            onClick={ () => toggleCanton(c) }
                                         >
-                                            <Checkbox checked={cantons.includes(c)} />
-                                            <span>{c}</span>
+                                            <Checkbox checked={ cantons.includes(c) } />
+                                            <span>{ c }</span>
                                         </div>
-                                    ))}
+                                    )) }
                                 </div>
                             </ScrollArea>
                         </PopoverContent>
                     </Popover>
                 </div>
 
-                {/* Kategorie */}
+                {/* Kategorie */ }
                 <div className="space-y-2">
                     <Label>Kategorie</Label>
                     <RadioGroup
-                        value={category}
-                        onValueChange={(val) => onCategoryChange(val as Cat)}
+                        value={ category }
+                        onValueChange={ (val) => onCategoryChange(val as Cat) }
                         className="flex gap-6"
                     >
                         <div className="flex items-center gap-2">
