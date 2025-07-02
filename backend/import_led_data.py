@@ -74,15 +74,10 @@ def import_led_data():
         existing_count = LedTube.query.count()
         if existing_count > 0:
             print(f"Found {existing_count} existing LED tubes in database.")
-            response = input(
-                "Do you want to clear existing data and reimport? (y/N): ")
-            if response.lower() == 'y':
-                LedTube.query.delete()
-                db.session.commit()
-                print("Cleared existing LED tube data.")
-            else:
-                print("Import cancelled.")
-                return
+            # Auto-clear for non-interactive mode
+            LedTube.query.delete()
+            db.session.commit()
+            print("Cleared existing LED tube data.")
 
         # Import LED tube data
         imported_count = 0
