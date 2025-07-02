@@ -30,7 +30,7 @@ export function RadarCard({
     const keys = ["Energy", "Gridusage", "Charge", "Aidfee"]
     const series = cantons.slice(0, COLORS.length)
     const data = keys.map((k) => {
-        const row: any = { component: k }
+        const row: {component: string; [key: string]: string | number} = { component: k }
         series.forEach((c) => {
             const comp = DEMO[c][category].comp24
             const sum = comp.energy + comp.gridusage + comp.charge + comp.aidfee

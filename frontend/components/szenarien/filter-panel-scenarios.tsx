@@ -33,7 +33,7 @@ export function FilterPanelScenarios({
 }){
 
     const toggleC=(c:string)=>{
-        if(!DEMO[c]){ toast.error(`Keine Daten für ${c}`); return }
+        if(!DEMO[c as keyof typeof DEMO]){ toast.error(`Keine Daten für ${c}`); return }
         onCantonsChange(cantons.includes(c)? cantons.filter(x=>x!==c):[...cantons,c])
     }
     const toggleLamp=(id:string)=>
@@ -103,7 +103,7 @@ export function FilterPanelScenarios({
                             <Button variant="outline" className="w-48 justify-between">
                                 {lamps.length
                                     ? lamps.length===1
-                                        ? LAMPS[lamps[0]].label
+                                        ? LAMPS[lamps[0] as keyof typeof LAMPS].label
                                         : `${lamps.length} Lampen gewählt`
                                     : "Bitte wählen"}
                                 <ChevronDown className="size-4 ml-2"/>

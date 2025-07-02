@@ -26,7 +26,7 @@ const loadLS = () => {
     if (typeof window === "undefined") return {}
     try { return JSON.parse(localStorage.getItem(LS_KEY) ?? "{}") } catch {}
 }
-const saveLS = (s: any) => localStorage.setItem(LS_KEY, JSON.stringify(s))
+const saveLS = (s: Record<string, unknown>) => localStorage.setItem(LS_KEY, JSON.stringify(s))
 
 /* ───── lineare Interpolation des Schnittpunkts ────────────── */
 function interpolate(
@@ -59,7 +59,7 @@ export default function AmortisationPage() {
     const has   = !!serie && serie.length>0
 
     /* ───── Kalkulation Reihen + Break-Even ─────────────────── */
-    let rows:any[]=[]
+    let rows: Array<{year: number; LED: number; [key: string]: number}> = []
     const breaks:Record<string,number|null>={}
     const dots :{id:string;x:number;y:number;color:string;lbl:string}[]=[]
 
@@ -70,7 +70,7 @@ export default function AmortisationPage() {
         rows = serie.map(({year,total})=>{
             const p = total/100                    // CHF/kWh
             accLED += (BASE.watt*RUNTIME)/1000 * p
-            const r:any = { year, LED:+accLED.toFixed(2) }
+            const r: {year: number; LED: number; [key: string]: number} = { year, LED:+accLED.toFixed(2) }
 
             lamps.forEach(id=>{
                 const l=LAMPS[id as keyof typeof LAMPS]
@@ -116,7 +116,7 @@ export default function AmortisationPage() {
 
             <LampCardGrid
                 baseline={BASE}
-                lamps={lamps.map(id=>({id,...LAMPS[id]}))}
+                lamps={lamps.map(id=>({id,...LAMPS[id as keyof typeof LAMPS]}))}
                 breakEvens={breaks}
                 maxYears={maxRelYears}
             />
@@ -156,7 +156,7 @@ export default function AmortisationPage() {
                                     <Legend/>
                                     <Line dataKey="LED" stroke="#64748b" dot/>
                                     {lamps.map((id,i)=>(
-                                        <Line key={id} dataKey={id} name={LAMPS[id].label}
+                                        <Line key={id} dataKey={id} name={LAMPS[id as keyof typeof LAMPS].label}
                                               stroke={COLORS[i]} dot/>
                                     ))}
                                     {dots.map(d=>(

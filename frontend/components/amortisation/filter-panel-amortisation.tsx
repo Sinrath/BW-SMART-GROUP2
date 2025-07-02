@@ -35,7 +35,7 @@ export function FilterPanelAmortisation({
         onLampsChange(lamps.includes(id)? lamps.filter(x=>x!==id): [...lamps,id])
 
     const selectCanton = (c:string)=>{
-        if(!DEMO[c]){ toast.error(`Für «${c}» keine Daten`); return }
+        if(!DEMO[c as keyof typeof DEMO]){ toast.error(`Für «${c}» keine Daten`); return }
         onCantonChange(c)
     }
 
@@ -114,7 +114,7 @@ export function FilterPanelAmortisation({
                                 {lamps.length
                                     ? lamps.length>2
                                         ? `${lamps.length} Lampen gewählt`
-                                        : lamps.map(id=>LAMPS[id].label.split(" ")[0]).join(", ")
+                                        : lamps.map(id=>LAMPS[id as keyof typeof LAMPS].label.split(" ")[0]).join(", ")
                                     : "Bitte wählen"}
                                 <ChevronDown className="ml-2 size-4"/>
                             </Button>

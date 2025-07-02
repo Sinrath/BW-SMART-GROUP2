@@ -23,7 +23,7 @@ export function TrendChart({
                                data,
                                cantons,
                            }: {
-    data: any[]
+    data: Array<{year: number; [key: string]: number | undefined}>
     cantons: string[]
 }) {
     return (
