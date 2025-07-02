@@ -15,7 +15,8 @@ import { Slider } from "@/components/ui/slider"
 import { ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 
-import { DEMO, LAMPS, CANTON_LIST } from "@/app/fakeData"
+import { useElectricityData } from "@/app/hooks/useElectricityData"
+import { useLedTubeData } from "@/app/hooks/useLedTubeData"
 import { Cat } from "@/app/types/categories"
 
 export function FilterPanelScenarios({
@@ -31,9 +32,21 @@ export function FilterPanelScenarios({
     installYear:number; onYearChange:(y:number)=>void
     runtime:number;     onRuntimeChange:(r:number)=>void
 }){
+    const { data: DEMO, cantons: availableCantons } = useElectricityData()
+    const { tubes } = useLedTubeData()
+    
+    const LAMPS = tubes.filter(t => !t.isBaseline).reduce((acc, tube) => {
+        const key = tube.name.toLowerCase().replace(/[^a-z]/g, '')
+        acc[key] = {
+            label: tube.name,
+            price: tube.price,
+            watt: tube.watt
+        }
+        return acc
+    }, {} as Record<string, { label: string; price: number; watt: number }>)
 
     const toggleC=(c:string)=>{
-        if(!DEMO[c as keyof typeof DEMO]){ toast.error(`Keine Daten für ${c}`); return }
+        if(!DEMO[c]){ toast.error(`Keine Daten für ${c}`); return }
         onCantonsChange(cantons.includes(c)? cantons.filter(x=>x!==c):[...cantons,c])
     }
     const toggleLamp=(id:string)=>
@@ -55,11 +68,11 @@ export function FilterPanelScenarios({
                         </PopoverTrigger>
                         <PopoverContent className="p-0 w-48">
                             <ScrollArea className="h-56">
-                                {CANTON_LIST.map(c=>(
-                                    <div key={c} className="px-3 py-1.5 hover:bg-muted/50 flex gap-2 items-center"
-                                         onClick={()=>toggleC(c)}>
-                                        <Checkbox checked={cantons.includes(c)}/>
-                                        {c}
+                                {availableCantons.map(canton=>(
+                                    <div key={canton.code} className="px-3 py-1.5 hover:bg-muted/50 flex gap-2 items-center"
+                                         onClick={()=>toggleC(canton.code)}>
+                                        <Checkbox checked={cantons.includes(canton.code)}/>
+                                        {canton.code} - {canton.label}
                                     </div>
                                 ))}
                             </ScrollArea>
@@ -103,7 +116,7 @@ export function FilterPanelScenarios({
                             <Button variant="outline" className="w-48 justify-between">
                                 {lamps.length
                                     ? lamps.length===1
-                                        ? LAMPS[lamps[0] as keyof typeof LAMPS].label
+                                        ? LAMPS[lamps[0]]?.label || lamps[0]
                                         : `${lamps.length} Lampen gewählt`
                                     : "Bitte wählen"}
                                 <ChevronDown className="size-4 ml-2"/>

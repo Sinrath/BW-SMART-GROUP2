@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ChevronDown } from "lucide-react"
 
-import { toast } from "sonner" //  ←  Sonner-Toast
-import { CANTON_LIST, DEMO } from "@/app/fakeData"
-import { Cat } from "@/app/types/categories"; //  dein Demo-Datensatz
+import { toast } from "sonner"
+import { useElectricityData } from "@/app/hooks/useElectricityData"
+import { Cat } from "@/app/types/categories";
 
 export function FilterPanel({
                                 cantons, onCantonsChange, category, onCategoryChange,
@@ -21,6 +21,7 @@ export function FilterPanel({
     category: Cat
     onCategoryChange: (c: Cat) => void
 }) {
+    const { data: DEMO, cantons: availableCantons } = useElectricityData()
     /* Umschalten eines Kantons */
     const toggleCanton = (c: string) => {
         if (!DEMO[c]) {
@@ -54,14 +55,14 @@ export function FilterPanel({
                         <PopoverContent className="p-0 w-56">
                             <ScrollArea className="h-60">
                                 <div className="p-2 space-y-1">
-                                    { CANTON_LIST.map((c) => (
+                                    { availableCantons.map((canton) => (
                                         <div
-                                            key={ c }
+                                            key={ canton.code }
                                             className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted/50"
-                                            onClick={ () => toggleCanton(c) }
+                                            onClick={ () => toggleCanton(canton.code) }
                                         >
-                                            <Checkbox checked={ cantons.includes(c) } />
-                                            <span>{ c }</span>
+                                            <Checkbox checked={ cantons.includes(canton.code) } />
+                                            <span>{ canton.code } - { canton.label }</span>
                                         </div>
                                     )) }
                                 </div>

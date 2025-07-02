@@ -37,3 +37,27 @@ class ElectricityPrice(db.Model):
             'energy': self.energy,
             'total': self.total
         }
+
+
+class LedTube(db.Model):
+    __tablename__ = 'led_tubes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    brand = db.Column(db.String(50), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    watt = db.Column(db.Float, nullable=False)
+    efficiency = db.Column(db.Float, nullable=False)  # 0-100 (percentage more efficient than base)
+    is_baseline = db.Column(db.Boolean, default=False)  # True for base LED tube
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'brand': self.brand,
+            'price': self.price,
+            'watt': self.watt,
+            'efficiency': self.efficiency,
+            'isBaseline': self.is_baseline
+        }

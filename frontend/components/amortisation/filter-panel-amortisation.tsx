@@ -12,10 +12,9 @@ import { ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 import clsx from "clsx"
 
-import { DEMO, LAMPS, CANTON_LIST } from "@/app/fakeData"
 import { Cat } from "@/app/types/categories"
+import { LedTube, ElectricityData } from "@/app/services/api"
 
-const lampList = Object.entries(LAMPS)
 const YEARS = [2017,2018,2019,2020,2021,2022,2023,2024]
 
 export function FilterPanelAmortisation({
@@ -24,18 +23,28 @@ export function FilterPanelAmortisation({
                                             lamps,           onLampsChange,
                                             installYear,     onYearChange,
                                             className,
+                                            availableCantons,
+                                            availableLamps,
+                                            electricityData,
                                         }: {
     canton: string;  onCantonChange:(c:string)=>void
     category: Cat;   onCategoryChange:(c:Cat)=>void
     lamps: string[]; onLampsChange:(l:string[])=>void
     installYear:number; onYearChange:(y:number)=>void
     className?: string
+    availableCantons: Array<{code: string, label: string}>
+    availableLamps: LedTube[]
+    electricityData: ElectricityData
 }) {
+    const lampList = availableLamps.filter(tube => !tube.isBaseline).map(tube => [
+        tube.name.toLowerCase().replace(/[^a-z]/g, ''),
+        tube
+    ] as [string, LedTube])
     const toggleLamp = (id:string)=>
         onLampsChange(lamps.includes(id)? lamps.filter(x=>x!==id): [...lamps,id])
 
     const selectCanton = (c:string)=>{
-        if(!DEMO[c as keyof typeof DEMO]){ toast.error(`Für «${c}» keine Daten`); return }
+        if(!electricityData[c]){ toast.error(`Für «${c}» keine Daten`); return }
         onCantonChange(c)
     }
 
@@ -55,11 +64,11 @@ export function FilterPanelAmortisation({
                         </PopoverTrigger>
                         <PopoverContent className="p-0 w-40">
                             <ScrollArea className="h-56">
-                                {CANTON_LIST.map(c=>(
-                                    <div key={c}
+                                {availableCantons.map(canton=>(
+                                    <div key={canton.code}
                                          className="cursor-pointer px-3 py-1.5 hover:bg-muted/50"
-                                         onClick={()=>selectCanton(c)}>
-                                        {c}
+                                         onClick={()=>selectCanton(canton.code)}>
+                                        {canton.code} - {canton.label}
                                     </div>
                                 ))}
                             </ScrollArea>
@@ -114,7 +123,10 @@ export function FilterPanelAmortisation({
                                 {lamps.length
                                     ? lamps.length>2
                                         ? `${lamps.length} Lampen gewählt`
-                                        : lamps.map(id=>LAMPS[id as keyof typeof LAMPS].label.split(" ")[0]).join(", ")
+                                        : lamps.map(id=>{
+                                            const tube = availableLamps.find(t => t.name.toLowerCase().replace(/[^a-z]/g, '') === id)
+                                            return tube ? tube.name.split(" ")[0] : id
+                                        }).join(", ")
                                     : "Bitte wählen"}
                                 <ChevronDown className="ml-2 size-4"/>
                             </Button>
@@ -122,12 +134,12 @@ export function FilterPanelAmortisation({
                         <PopoverContent className="p-0 w-60">
                             <ScrollArea className="h-56">
                                 <div className="p-2 space-y-1">
-                                    {lampList.map(([id,l])=>(
+                                    {lampList.map(([id,tube])=>(
                                         <div key={id}
                                              className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted/50 cursor-pointer"
                                              onClick={()=>toggleLamp(id)}>
                                             <Checkbox checked={lamps.includes(id)}/>
-                                            <span>{l.label}</span>
+                                            <span>{tube.name}</span>
                                         </div>
                                     ))}
                                 </div>

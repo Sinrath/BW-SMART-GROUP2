@@ -4,12 +4,18 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     ResponsiveContainer, Tooltip,
 } from "recharts"
-import { DEMO } from "@/app/fakeData"
+import { useElectricityData } from "@/app/hooks/useElectricityData"
 import { Cat } from "@/app/types/categories"
 
 export function PriceTrendChart({
                                     canton, category,
                                 }: { canton:string; category:Cat }) {
+    const { data: DEMO } = useElectricityData()
+    
+    if (!DEMO || !DEMO[canton]?.[category]?.trend) {
+        return <div className="flex h-60 items-center justify-center text-muted-foreground">Keine Daten verfügbar</div>
+    }
+    
     const data = DEMO[canton][category].trend.map(t=>({
         year: t.year,
         price: +(t.total / 100).toFixed(3),   // CHF/kWh

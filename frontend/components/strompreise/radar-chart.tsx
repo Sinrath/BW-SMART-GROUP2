@@ -11,7 +11,7 @@ import {
     Tooltip,
 } from "recharts"
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
-import { DEMO } from "@/app/fakeData"
+import { useElectricityData } from "@/app/hooks/useElectricityData"
 import { Cat } from "@/app/types/categories";
 
 /* bis zu 5 Farben – Lucide/ shadcn-Palette */
@@ -24,7 +24,8 @@ export function RadarCard({
     cantons: string[]
     category: Cat
 }) {
-    if (!cantons.length) return null
+    const { data: DEMO } = useElectricityData()
+    if (!cantons.length || !DEMO || Object.keys(DEMO).length === 0) return null
 
     /* Daten → %-Anteile jeder Komponente je Kanton */
     const keys = ["Energy", "Gridusage", "Charge", "Aidfee"]
@@ -32,7 +33,9 @@ export function RadarCard({
     const data = keys.map((k) => {
         const row: {component: string; [key: string]: string | number} = { component: k }
         series.forEach((c) => {
-            const comp = DEMO[c][category].comp24
+            const comp = DEMO[c]?.[category]?.comp24
+            if (!comp) return
+            
             const sum = comp.energy + comp.gridusage + comp.charge + comp.aidfee
             const part =
                 k === "Energy"

@@ -8,12 +8,14 @@ import { TriangleAlert } from "lucide-react"
 import { FilterPanel } from "@/components/strompreise/filter-panel"
 import { TrendChart } from "@/components/strompreise/trend-chart"
 import { ComponentChart } from "@/components/strompreise/component-chart"
-import { DEMO } from "@/app/fakeData"
+import { useElectricityData } from "@/app/hooks/useElectricityData"
 import { Cat } from "@/app/types/categories";
 import { PriceSpreadChart } from "@/components/strompreise/price-spread-chart";
 import { RadarCard } from "@/components/strompreise/radar-chart";
 
 export default function StrompreisExplorerPage() {
+    const { data: DEMO, loading, error } = useElectricityData()
+    
     /* ─── State ─────────────────────────────────────────── */
     const [ cantons, setCantons ] = React.useState<string[]>(() => {
         if (typeof window !== 'undefined') {
@@ -41,12 +43,31 @@ export default function StrompreisExplorerPage() {
         }
     }, [ category ])
 
+    if (loading) {
+        return (
+            <div className="flex h-96 items-center justify-center">
+                <div className="text-muted-foreground">Lade Daten...</div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <Alert>
+                <TriangleAlert className="h-4 w-4" />
+                <AlertDescription>
+                    Fehler beim Laden der Daten: {error}
+                </AlertDescription>
+            </Alert>
+        )
+    }
+
     /* ─── 1) nur Kantone, die echte Daten haben ─────────── */
     const validCantons = cantons.filter((c) => DEMO[c as keyof typeof DEMO])
     const hasSelection = validCantons.length > 0
 
     /* ─── 2) Trend-Daten zusammenführen ─────────────────── */
-    const years = DEMO.ZH.C2.trend.map((d) => d.year)         // gemeinsame X-Achse
+    const years = DEMO.ZH?.C2?.trend?.map((d) => d.year) || []         // gemeinsame X-Achse
     const trendData = hasSelection
         ? years.map((year) => {
             const obj: {year: number; [key: string]: number | undefined} = { year }

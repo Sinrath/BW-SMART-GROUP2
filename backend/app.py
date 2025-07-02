@@ -1,13 +1,13 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from models import db, ElectricityPrice
+from models import db, ElectricityPrice, LedTube
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=['http://localhost:3000', 'http://127.0.0.1:3000', 'http://frontend:3000'])
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///electricity_prices.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bw-smart-energy.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize database
@@ -76,6 +76,48 @@ def get_years():
     ).distinct().order_by(ElectricityPrice.period.desc()).all()
 
     return jsonify([year[0] for year in years])
+
+
+@app.route('/api/led-tubes')
+def get_led_tubes():
+    # Get query parameters
+    brand = request.args.get('brand')
+    min_efficiency = request.args.get('min_efficiency', type=float)
+    max_price = request.args.get('max_price', type=float)
+
+    # Build query
+    query = LedTube.query
+
+    if brand:
+        query = query.filter(LedTube.brand.ilike(f'%{brand}%'))
+    if min_efficiency is not None:
+        query = query.filter(LedTube.efficiency >= min_efficiency)
+    if max_price is not None:
+        query = query.filter(LedTube.price <= max_price)
+
+    # Execute query and return results
+    tubes = query.order_by(LedTube.efficiency.desc()).all()
+
+    return jsonify([tube.to_dict() for tube in tubes])
+
+
+@app.route('/api/led-tubes/baseline')
+def get_baseline_tube():
+    # Get the baseline LED tube
+    baseline = LedTube.query.filter_by(is_baseline=True).first()
+    
+    if not baseline:
+        return jsonify({"error": "No baseline tube found"}), 404
+    
+    return jsonify(baseline.to_dict())
+
+
+@app.route('/api/led-tubes/brands')
+def get_led_brands():
+    # Get unique brands
+    brands = db.session.query(LedTube.brand).distinct().order_by(LedTube.brand).all()
+    
+    return jsonify([brand[0] for brand in brands])
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts"
-import { DEMO } from "@/app/fakeData"
+import { useElectricityData } from "@/app/hooks/useElectricityData"
 import { Cat } from "@/app/types/categories";
 
 export function PriceSpreadChart({
@@ -20,9 +20,10 @@ export function PriceSpreadChart({
     cantons: string[]
     category: Cat
 }) {
-    if (!cantons.length) return null
+    const { data: DEMO } = useElectricityData()
+    if (!cantons.length || !DEMO || Object.keys(DEMO).length === 0) return null
 
-    const years = DEMO.ZH.C2.trend.map((d) => d.year)
+    const years = DEMO.ZH?.C2?.trend?.map((d) => d.year) || []
 
     /* Min/Max/Ø je Jahr berechnen */
     const data = years.map((year) => {

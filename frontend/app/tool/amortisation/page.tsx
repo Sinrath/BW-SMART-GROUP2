@@ -11,7 +11,8 @@ import {
     ResponsiveContainer, ReferenceDot, Legend, Label,
 } from "recharts"
 
-import { DEMO, BASE, LAMPS } from "@/app/fakeData"
+import { useElectricityData } from "@/app/hooks/useElectricityData"
+import { useLedTubeData } from "@/app/hooks/useLedTubeData"
 import { Cat } from "@/app/types/categories"
 import { FilterPanelAmortisation } from "@/components/amortisation/filter-panel-amortisation"
 import { LampCardGrid } from "@/components/amortisation/lamp-card-grid"
@@ -42,6 +43,9 @@ function interpolate(
 }
 
 export default function AmortisationPage() {
+    const { data: DEMO, cantons, loading: electricityLoading, error: electricityError } = useElectricityData()
+    const { tubes, baseline, loading: ledLoading, error: ledError } = useLedTubeData()
+    
     /* ───── Zustand ─────────────────────────────────────────── */
     const init              = loadLS()
     const [canton, setCan]  = React.useState(init.canton   ?? "ZH")
@@ -51,6 +55,40 @@ export default function AmortisationPage() {
 
     React.useEffect(()=>saveLS({ canton,category,lamps,year:install }),
         [canton,category,lamps,install])
+
+    // Loading and error states
+    if (electricityLoading || ledLoading) {
+        return (
+            <div className="flex h-96 items-center justify-center">
+                <div className="text-muted-foreground">Lade Daten...</div>
+            </div>
+        )
+    }
+
+    if (electricityError || ledError) {
+        return (
+            <Alert>
+                <TriangleAlert className="h-4 w-4" />
+                <div>
+                    Fehler beim Laden der Daten:
+                    {electricityError && <div>Strompreise: {electricityError}</div>}
+                    {ledError && <div>LED-Daten: {ledError}</div>}
+                </div>
+            </Alert>
+        )
+    }
+
+    // Transform LED tube data to match fake data structure
+    const BASE = baseline ? { price: baseline.price, watt: baseline.watt } : { price: 20, watt: 18 }
+    const LAMPS = tubes.filter(t => !t.isBaseline).reduce((acc, tube) => {
+        const key = tube.name.toLowerCase().replace(/[^a-z]/g, '')
+        acc[key] = {
+            label: tube.name,
+            price: tube.price,
+            watt: tube.watt
+        }
+        return acc
+    }, {} as Record<string, { label: string; price: number; watt: number }>)
 
     /* ───── Preisserie ab Einbaujahr ────────────────────────── */
     const full  = DEMO[canton]?.[category]?.trend
@@ -112,6 +150,9 @@ export default function AmortisationPage() {
                 category={category} onCategoryChange={setCat}
                 lamps={lamps} onLampsChange={setL}
                 installYear={install} onYearChange={setY}
+                availableCantons={cantons}
+                availableLamps={tubes}
+                electricityData={DEMO}
             />
 
             <LampCardGrid
