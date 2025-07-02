@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export interface ElectricityPriceRecord {
   id: number;
@@ -65,14 +65,33 @@ const CANTON_ABBR_TO_CODE = Object.fromEntries(
 
 export class ApiService {
   private async fetchApi<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
-    const url = new URL(`${API_BASE_URL}${endpoint}`);
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value) url.searchParams.append(key, value);
-      });
+    let url: string;
+    
+    if (API_BASE_URL) {
+      // Full URL with base URL
+      const fullUrl = new URL(`${API_BASE_URL}${endpoint}`);
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value) fullUrl.searchParams.append(key, value);
+        });
+      }
+      url = fullUrl.toString();
+    } else {
+      // Relative URL for same-origin requests
+      url = endpoint;
+      if (params) {
+        const searchParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value) searchParams.append(key, value);
+        });
+        const queryString = searchParams.toString();
+        if (queryString) {
+          url += `?${queryString}`;
+        }
+      }
     }
     
-    const response = await fetch(url.toString());
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`API request failed: ${response.statusText}`);
     }
@@ -87,13 +106,14 @@ export class ApiService {
     if (period) params.period = period;
     if (category) params.category = category;
     
-    return this.fetchApi<ElectricityPriceRecord[]>('/api/prices', params);
+    const response = await this.fetchApi<{data: ElectricityPriceRecord[], count: number}>('/api/prices', params);
+    return response.data;
   }
 
   async getCantons(): Promise<Canton[]> {
-    const cantons = await this.fetchApi<Array<{code: string, label: string}>>('/api/cantons');
+    const cantons = await this.fetchApi<Array<{value: string, label: string}>>('/api/cantons');
     return cantons.map(canton => ({
-      code: CANTON_CODE_MAP[canton.code] || canton.code,
+      code: CANTON_CODE_MAP[canton.value] || canton.value,
       label: canton.label
     }));
   }
@@ -125,10 +145,12 @@ export class ApiService {
     records.forEach(record => {
       const cantonAbbr = CANTON_CODE_MAP[record.canton] || record.canton;
       
+      // Initialize canton if it doesn't exist
       if (!result[cantonAbbr]) {
         result[cantonAbbr] = {};
       }
       
+      // Initialize category if it doesn't exist
       if (!result[cantonAbbr][record.category]) {
         result[cantonAbbr][record.category] = {
           trend: [],
@@ -141,24 +163,43 @@ export class ApiService {
         };
       }
       
+      // Add trend data
       result[cantonAbbr][record.category].trend.push({
         year: parseInt(record.period),
         total: record.total
       });
       
+      // Update comp24 with 2024 data
       if (record.period === '2024') {
         result[cantonAbbr][record.category].comp24 = {
-          aidfee: record.aidfee,
-          charge: record.charge,
-          gridusage: record.gridusage,
-          energy: record.energy
+          aidfee: record.aidfee || 0,
+          charge: record.charge || 0,
+          gridusage: record.gridusage || 0,
+          energy: record.energy || 0
         };
       }
     });
     
-    Object.values(result).forEach((canton) => {
-      Object.values(canton).forEach((category) => {
-        category.trend.sort((a, b) => a.year - b.year);
+    // Sort trend data and ensure all required combinations exist
+    Object.keys(result).forEach((cantonKey) => {
+      const canton = result[cantonKey];
+      
+      // Ensure both C2 and C3 categories exist for each canton
+      ['C2', 'C3'].forEach(category => {
+        if (!canton[category]) {
+          canton[category] = {
+            trend: [],
+            comp24: {
+              aidfee: 0,
+              charge: 0,
+              gridusage: 0,
+              energy: 0
+            }
+          };
+        }
+        
+        // Sort trend data by year
+        canton[category].trend.sort((a, b) => a.year - b.year);
       });
     });
     
