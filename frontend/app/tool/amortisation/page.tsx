@@ -50,8 +50,8 @@ export default function AmortisationPage() {
     const init              = loadLS()
     const [canton, setCan]  = React.useState(init.canton   ?? "ZH")
     const [category,setCat] = React.useState<Cat>(init.category ?? "C3")
-    const [lamps,  setL]    = React.useState<string[]>(init.lamps ?? ["budget"])
-    const [install, setY]   = React.useState<number>(init.year   ?? 2021)
+    const [lamps,  setL]    = React.useState<string[]>(init.lamps ?? [])
+    const [install, setY]   = React.useState<number>(init.year   ?? 2020)
 
     React.useEffect(()=>saveLS({ canton,category,lamps,year:install }),
         [canton,category,lamps,install])
@@ -77,9 +77,24 @@ export default function AmortisationPage() {
             </Alert>
         )
     }
+    
+    // Check if we have essential data
+    if (!baseline || !tubes || tubes.length === 0) {
+        console.error('LED data not ready:', { baseline, tubes: tubes?.length });
+        return (
+            <Alert>
+                <TriangleAlert className="h-4 w-4" />
+                <div>
+                    LED-Daten werden geladen oder fehlen. 
+                    {!baseline && 'Keine Basis-LED-Röhre gefunden.'}
+                    {(!tubes || tubes.length === 0) && ' Keine LED-Röhren gefunden.'}
+                </div>
+            </Alert>
+        )
+    }
 
     // Transform LED tube data to match fake data structure
-    const BASE = baseline ? { price: baseline.price, watt: baseline.watt } : { price: 20, watt: 18 }
+    const BASE = { price: baseline?.price || 0, watt: baseline?.watt || 0 }
     const LAMPS = tubes.filter(t => !t.isBaseline).reduce((acc, tube) => {
         const key = tube.name.toLowerCase().replace(/[^a-z]/g, '')
         acc[key] = {
@@ -89,6 +104,11 @@ export default function AmortisationPage() {
         }
         return acc
     }, {} as Record<string, { label: string; price: number; watt: number }>)
+    
+    // Debug logging
+    console.log('LAMPS object:', LAMPS)
+    console.log('Selected lamps:', lamps)
+    console.log('Available lamp keys:', Object.keys(LAMPS))
 
     /* ───── Preisserie ab Einbaujahr ────────────────────────── */
     const full  = DEMO[canton]?.[category]?.trend
@@ -112,6 +132,7 @@ export default function AmortisationPage() {
 
             lamps.forEach(id=>{
                 const l=LAMPS[id as keyof typeof LAMPS]
+                if(!l) return // Skip if lamp not found
                 if(accSmart[id]===undefined) accSmart[id]=l.price
                 accSmart[id]+= (l.watt*RUNTIME)/1000 * p
                 r[id]=+accSmart[id].toFixed(2)
@@ -120,6 +141,7 @@ export default function AmortisationPage() {
         })
 
         lamps.forEach((id,i)=>{
+            if(!LAMPS[id as keyof typeof LAMPS]) return // Skip if lamp not found
             let rel:null|number=null
             for(let j=1;j<rows.length;j++){
                 if(rows[j-1][id]>rows[j-1].LED && rows[j][id]<=rows[j].LED){
@@ -157,7 +179,7 @@ export default function AmortisationPage() {
 
             <LampCardGrid
                 baseline={BASE}
-                lamps={lamps.map(id=>({id,...LAMPS[id as keyof typeof LAMPS]}))}
+                lamps={lamps.filter(id => LAMPS[id as keyof typeof LAMPS]).map(id=>({id,...LAMPS[id as keyof typeof LAMPS]}))}
                 breakEvens={breaks}
                 maxYears={maxRelYears}
             />
@@ -196,7 +218,7 @@ export default function AmortisationPage() {
                                     />
                                     <Legend/>
                                     <Line dataKey="LED" stroke="#64748b" dot/>
-                                    {lamps.map((id,i)=>(
+                                    {lamps.filter(id => LAMPS[id as keyof typeof LAMPS]).map((id,i)=>(
                                         <Line key={id} dataKey={id} name={LAMPS[id as keyof typeof LAMPS].label}
                                               stroke={COLORS[i]} dot/>
                                     ))}

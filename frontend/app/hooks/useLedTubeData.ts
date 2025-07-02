@@ -24,13 +24,22 @@ export function useLedTubeData(): UseLedTubeDataReturn {
       
       const [tubesData, baselineData, brandsData] = await Promise.all([
         apiService.getLedTubes(),
-        apiService.getBaselineTube(),
+        apiService.getBaselineTube().catch(err => {
+          console.error('Failed to fetch baseline tube:', err);
+          return null;
+        }),
         apiService.getLedBrands()
       ]);
       
-      setTubes(tubesData);
+      console.log('LED Tube API responses:', {
+        tubes: tubesData?.length,
+        baseline: baselineData,
+        brands: brandsData?.length
+      });
+      
+      setTubes(tubesData || []);
       setBaseline(baselineData);
-      setBrands(brandsData);
+      setBrands(brandsData || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       console.error('Failed to fetch LED tube data:', err);

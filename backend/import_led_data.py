@@ -10,7 +10,7 @@ from models import LedTube
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
-# LED tube data
+# LED tube data - Realistic T8 LED tubes with smart features
 LED_TUBES_DATA = [
     {
         'name': 'Standard LED Tube',
@@ -21,51 +21,43 @@ LED_TUBES_DATA = [
         'is_baseline': True
     },
     {
-        'name': 'Nomus Smart LED 50%',
-        'brand': 'Nomus',
-        'price': 200.0,
-        'watt': 7.0,
-        'efficiency': 50.0,  # 50% more efficient
+        'name': 'Smart LED Basic (Dimming)',
+        'brand': 'Signify',
+        'price': 35.0,
+        'watt': 16.0,
+        'efficiency': 21.0,
         'is_baseline': False
     },
     {
-        'name': 'EcoSmart LED 40%',
-        'brand': 'EcoSmart',
-        'price': 150.0,
-        'watt': 8.4,
-        'efficiency': 40.0,  # 40% more efficient
-        'is_baseline': False
-    },
-    {
-        'name': 'Budget Smart LED 30%',
-        'brand': 'Budget',
-        'price': 80.0,
-        'watt': 9.0,
-        'efficiency': 30.0,  # 30% more efficient
-        'is_baseline': False
-    },
-    {
-        'name': 'Premium Smart LED 70%',
-        'brand': 'Philips',
-        'price': 350.0,
-        'watt': 5.4,
-        'efficiency': 70.0,  # 70% more efficient
-        'is_baseline': False
-    },
-    {
-        'name': 'High-End Smart LED 80%',
+        'name': 'Smart LED with Motion Sensor',
         'brand': 'Osram',
-        'price': 450.0,
-        'watt': 3.6,
-        'efficiency': 80.0,  # 80% more efficient
+        'price': 45.0,
+        'watt': 15.5,
+        'efficiency': 33.0,
         'is_baseline': False
     },
     {
-        'name': 'Ultra Efficient LED 90%',
+        'name': 'Smart LED Daylight Harvesting',
+        'brand': 'Philips',
+        'price': 55.0,
+        'watt': 15.0,
+        'efficiency': 55.0,
+        'is_baseline': False
+    },
+    {
+        'name': 'IoT Smart LED (Full Control)',
         'brand': 'Cree',
-        'price': 600.0,
-        'watt': 1.8,
-        'efficiency': 90.0,  # 90% more efficient
+        'price': 65.0,
+        'watt': 14.5,
+        'efficiency': 81.0,
+        'is_baseline': False
+    },
+    {
+        'name': 'Premium Smart LED Suite',
+        'brand': 'Acuity Brands',
+        'price': 75.0,
+        'watt': 14.0,
+        'efficiency': 90.0,
         'is_baseline': False
     }
 ]

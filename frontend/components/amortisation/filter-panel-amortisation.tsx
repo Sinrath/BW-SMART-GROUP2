@@ -1,4 +1,5 @@
 "use client"
+import React from "react"
 import {
     Card, CardHeader, CardContent, CardTitle,
 } from "@/components/ui/card"
@@ -15,7 +16,7 @@ import clsx from "clsx"
 import { Cat } from "@/app/types/categories"
 import { LedTube, ElectricityData } from "@/app/services/api"
 
-const YEARS = [2017,2018,2019,2020,2021,2022,2023,2024]
+const YEARS = [2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024]
 
 export function FilterPanelAmortisation({
                                             canton,          onCantonChange,
@@ -40,8 +41,22 @@ export function FilterPanelAmortisation({
         tube.name.toLowerCase().replace(/[^a-z]/g, ''),
         tube
     ] as [string, LedTube])
-    const toggleLamp = (id:string)=>
-        onLampsChange(lamps.includes(id)? lamps.filter(x=>x!==id): [...lamps,id])
+    
+    const validLampIds = lampList.map(([id]) => id)
+    
+    // Clean up invalid lamp IDs from state
+    React.useEffect(() => {
+        const validSelectedLamps = lamps.filter(id => validLampIds.includes(id))
+        if (validSelectedLamps.length !== lamps.length) {
+            console.log('Cleaning up invalid lamp IDs:', lamps, '→', validSelectedLamps)
+            onLampsChange(validSelectedLamps)
+        }
+    }, [validLampIds.join(','), lamps.join(',')]) // eslint-disable-line react-hooks/exhaustive-deps
+    
+    const toggleLamp = (id:string)=> {
+        const newLamps = lamps.includes(id) ? lamps.filter(x=>x!==id) : [...lamps,id]
+        onLampsChange(newLamps)
+    }
 
     const selectCanton = (c:string)=>{
         if(!electricityData[c]){ toast.error(`Für «${c}» keine Daten`); return }

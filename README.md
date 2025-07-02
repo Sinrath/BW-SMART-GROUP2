@@ -50,7 +50,7 @@
 
 2. Import all data (29 cantons × 15 years):
    ```bash
-   python import_data.py
+   python import_electric_price_data.py
    ```
    This will fetch all electricity price data from 2010-2024 for all Swiss cantons.
 
