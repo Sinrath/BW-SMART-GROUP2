@@ -54,7 +54,7 @@ function payback(
         led += (BASE.watt * runtime) / 1000 * p
         smart += (lamp.watt * runtime) / 1000 * p
         if (smart <= led) {
-            const rel = i - idx + 1   // voll­ständige Jahre
+            const rel = i - idx   // Jahre seit Installation
             return Math.min(rel, MAX_YEARS)
         }
     }
@@ -69,8 +69,8 @@ export default function ScenarioPage() {
     const init = loadLS()
     const [cantons, setC] = React.useState<string[]>(init.cantons ?? ["ZH", "BE"])
     const [category, setCat] = React.useState<Cat>(init.category ?? "C3")
-    const [lamps, setL] = React.useState<string[]>(init.lamps ?? ["budget", "econ"])
-    const [install, setY] = React.useState<number>(init.year ?? 2021)
+    const [lamps, setL] = React.useState<string[]>(init.lamps ?? [])
+    const [install, setY] = React.useState<number>(init.year ?? 2020)
     const [runtime, setRt] = React.useState<number>(init.rt ?? 6000)
 
     React.useEffect(() => saveLS({
@@ -124,10 +124,9 @@ export default function ScenarioPage() {
         } = {canton: c}
         lamps.forEach((id) => {
             const lamp = LAMPS[id]
-            if (lamp) {
-                const yrs = payback(c, category, lamp, install, runtime, DEMO, BASE)
-                obj[id] = yrs
-            }
+            if (!lamp) return // Skip if lamp not found
+            const yrs = payback(c, category, lamp, install, runtime, DEMO, BASE)
+            obj[id] = yrs
         })
         return obj
     })
@@ -188,7 +187,7 @@ export default function ScenarioPage() {
                                     labelFormatter={(l) => `Kanton ${l}`}
                                 />
                                 <Legend/>
-                                {lamps.map((id, i) => (
+                                {lamps.filter(id => LAMPS[id]).map((id, i) => (
                                     <Bar key={id} dataKey={id}
                                          name={LAMPS[id]?.label || id}
                                          fill={COLORS[i]} maxBarSize={26}>

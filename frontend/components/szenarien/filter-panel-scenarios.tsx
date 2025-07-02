@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import {
     Card, CardHeader, CardContent, CardTitle,
 } from "@/components/ui/card"
@@ -44,6 +45,17 @@ export function FilterPanelScenarios({
         }
         return acc
     }, {} as Record<string, { label: string; price: number; watt: number }>)
+
+    const validLampIds = Object.keys(LAMPS)
+    
+    // Clean up invalid lamp IDs from state
+    React.useEffect(() => {
+        const validSelectedLamps = lamps.filter(id => validLampIds.includes(id))
+        if (validSelectedLamps.length !== lamps.length) {
+            console.log('Cleaning up invalid lamp IDs in scenarios:', lamps, '→', validSelectedLamps)
+            onLampsChange(validSelectedLamps)
+        }
+    }, [validLampIds.join(','), lamps.join(',')]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const toggleC=(c:string)=>{
         if(!DEMO[c]){ toast.error(`Keine Daten für ${c}`); return }
@@ -102,7 +114,7 @@ export function FilterPanelScenarios({
                         value={installYear}
                         onChange={(e)=>onYearChange(+e.target.value)}
                     >
-                        {Array.from({length:8},(_,i)=>2017+i).map(y=>(
+                        {Array.from({length:14},(_,i)=>2011+i).map(y=>(
                             <option key={y} value={y}>{y}</option>
                         ))}
                     </select>
