@@ -107,7 +107,7 @@ export function FilterPanelLifetime({
                     </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 flex flex-col items-center">
                     <Label htmlFor="year-input">Einbaujahr</Label>
                     <Input
                         id="year-input"
@@ -117,8 +117,9 @@ export function FilterPanelLifetime({
                         min={minYear}
                         max={maxYear}
                         placeholder="Jahr"
+                        className="w-24 text-center"
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground text-center">
                         {minYear} - {maxYear}
                     </p>
                 </div>

@@ -109,7 +109,7 @@ export function ReplacementSchedule({
     // Environmental impact calculations
     const environmentalImpact = React.useMemo(() => {
         const co2PerKWh = 0.1 // kg CO2 per kWh (Swiss electricity mix estimate)
-        const manufacturingCO2PerLED = 2.0 // kg CO2 per LED manufacturing (estimate)
+        const manufacturingCO2PerLED = 3.0 // kg CO2 per LED manufacturing (estimate)
         const analysisYears = 20
         
         // Calculate total LED units needed over 20 years (including initial + replacements)
@@ -239,7 +239,7 @@ export function ReplacementSchedule({
 
                 <div className="text-xs text-muted-foreground bg-yellow-50 p-3 rounded">
                     <strong>Hinweis:</strong> CO₂-Werte basieren auf Schätzungen von 0.1 kg CO₂/kWh für den Schweizer Strommix 
-                    und 2.0 kg CO₂ pro LED-Herstellung. Berechnung über 20 Jahre inklusive aller benötigten Ersatz-LEDs. 
+                    und 3.0 kg CO₂ pro LED-Herstellung. Berechnung über 20 Jahre inklusive aller benötigten Ersatz-LEDs. 
                     Werte dienen nur zur Veranschaulichung.
                 </div>
             </CardContent>
