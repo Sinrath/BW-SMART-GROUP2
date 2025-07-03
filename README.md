@@ -2,16 +2,18 @@
 
 A comprehensive web application for analyzing electricity prices and LED lighting costs in Switzerland, developed for the ZHAW BW-SMART project.
 
-## 🏗️ Project Architecture
+## Project Architecture
 
 ```
 BW-SMART-GROUP2/
 ├── frontend/          # Next.js React frontend
 ├── backend/           # Flask Python backend
-└── README.md         # This file
+├── nginx/             # Nginx reverse proxy configuration
+├── docker-compose.yml # Docker orchestration
+└── README.md          # This file
 ```
 
-## 🎯 Overview
+## Overview
 
 The BW-SMART Dashboard provides intelligent analysis tools for:
 - **Electricity price trends** across Swiss cantons
@@ -19,7 +21,7 @@ The BW-SMART Dashboard provides intelligent analysis tools for:
 - **Future price predictions** using time series analysis
 - **Total cost of ownership** analysis over product lifecycles
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Frontend
 - **Framework**: Next.js with TypeScript
@@ -35,7 +37,7 @@ The BW-SMART Dashboard provides intelligent analysis tools for:
 - **Data Processing**: Pandas, NumPy
 - **APIs**: REST endpoints for data access
 
-## 📊 Data Sources & Methodology
+## Data Sources & Methodology
 
 ### Electricity Price Data
 - **Source**: Swiss Federal Electricity Commission (ElCom) API
@@ -44,7 +46,10 @@ The BW-SMART Dashboard provides intelligent analysis tools for:
 - **Components**: Grid usage, energy costs, charges, aid fees
 
 ### LED Product Data
-- ToDo
+- **Source**: Curated database of commercial LED products
+- **Categories**: Standard LED tubes and Smart LED solutions
+- **Metrics**: Power consumption (watts), efficiency gains (%), lifetime (hours)
+- **Pricing**: Swiss market prices in CHF
 
 ### Price Predictions
 - **Algorithm**: Holt-Winters Exponential Smoothing with damped trend
@@ -52,11 +57,11 @@ The BW-SMART Dashboard provides intelligent analysis tools for:
 - **Scenarios**: Conservative (-20%), Medium (base), Optimistic (+20%)
 - **Constraints**: Maximum 50% first-year growth, 10% annual growth cap
 
-## 🔧 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
-- **Frontend**: Node.js 18+ and npm
-- **Backend**: Python 3.8+ and pip
+- **Development**: Node.js 18+ and npm, Python 3.8+ and pip
+- **Production**: Docker and Docker Compose
 
 ### Backend Setup
 
@@ -115,7 +120,50 @@ The BW-SMART Dashboard provides intelligent analysis tools for:
    npm start
    ```
 
-## 📈 Analysis Tools
+## Docker Deployment
+
+### Development with Docker
+
+1. **Build and start all services**:
+   ```bash
+   docker-compose up --build
+   ```
+   This starts:
+   - Backend on port 5001
+   - Frontend served through nginx on port 80
+   - Nginx as reverse proxy
+
+2. **Stop services**:
+   ```bash
+   docker-compose down
+   ```
+
+### Production Deployment
+
+1. **SSL Certificate Setup**:
+   Place your SSL certificates in `nginx/ssl/`:
+   - `cert.pem` - SSL certificate
+   - `key.pem` - Private key
+
+2. **Update nginx configuration**:
+   ```bash
+   cp nginx/nginx.prod.conf nginx/nginx.conf
+   ```
+
+3. **Deploy with Docker Compose**:
+   ```bash
+   docker-compose -f docker-compose.yml up -d
+   ```
+
+### Environment Variables
+
+#### Backend (Flask)
+- `FLASK_ENV`: Set to `production` for production deployment
+
+#### Frontend (Next.js)
+- `NEXT_PUBLIC_API_URL`: Backend API URL (leave empty for relative paths in production)
+
+## Analysis Tools
 
 ### 1. Strompreis-Analyse (Price Analysis)
 - **Purpose**: Interactive exploration of electricity price trends
@@ -139,30 +187,51 @@ The BW-SMART Dashboard provides intelligent analysis tools for:
 
 ### 5. LED-Übersicht (Lifetime Calculator)
 - **Purpose**: Total cost of ownership analysis over LED lifetime
-- **Features**: ToDO
+- **Features**: 
+  - Lifecycle cost comparison
+  - Replacement schedule visualization
+  - Energy and CO2 savings calculation
+  - Break-even analysis over product lifetime
 - **Data Integration**: Combines historical (2014-2024) and predicted (2025-2040) prices
 - **Assumptions**: 
   - 6,000 operating hours per year
-  - 0.1 kg CO₂ per kWh (Swiss electricity mix estimate)
+  - 0.1 kg CO2 per kWh (Swiss electricity mix estimate)
 
-## 🔬 Data Processing Pipeline
+## Data Processing Pipeline
 
 ### 1. Historical Data Import (`import_electric_price_data.py`)
-- ToDo
+- **Source**: ElCom API (https://api.elcom.admin.ch)
+- **Process**: 
+  - Fetches annual electricity prices for all Swiss cantons
+  - Extracts price components (grid, energy, charges, fees)
+  - Stores data in SQLite database
+- **Update Frequency**: Annual (new data typically available in Q3)
 
 ### 2. LED Data Import (`import_led_data.py`)
-- ToDo
+- **Process**: 
+  - Loads LED product specifications from predefined dataset
+  - Validates technical specifications and pricing
+  - Establishes baseline product for comparisons
+- **Data Points**: Brand, model, wattage, efficiency, lifetime, price
 
 ### 3. Price Prediction (`price_prediction.py`)
-- ToDO
+- **Algorithm**: Holt-Winters Exponential Smoothing
+- **Implementation**:
+  - Analyzes historical price trends (2014-2024)
+  - Applies damped trend to prevent unrealistic growth
+  - Generates three scenarios with +/-20% variation
+- **Constraints**:
+  - Maximum 50% growth in first year
+  - 10% annual growth cap thereafter
+  - Ensures realistic long-term projections
 
-## 🌱 Environmental Impact Notes
+## Environmental Impact Notes
 
-The CO₂ calculations in the LED-Übersicht tool use an estimated value of **0.1 kg CO₂ per kWh** for the Swiss electricity mix. This is a simplified estimate and should be considered indicative rather than precise.
+The CO2 calculations in the LED-Übersicht tool use an estimated value of **0.1 kg CO2 per kWh** for the Swiss electricity mix. This is a simplified estimate and should be considered indicative rather than precise.
 
 **Note**: These environmental figures are for demonstration purposes and may not reflect current Swiss energy grid carbon intensity.
 
-## 🗄️ Database Schema
+## Database Schema
 
 ### `electricity_prices`
 - **period** (STRING): Year (e.g., "2024")
@@ -188,7 +257,7 @@ The CO₂ calculations in the LED-Übersicht tool use an estimated value of **0.
 - **scenario** (STRING): "konservativ", "mittel", "optimistisch"
 - **predicted_total** (FLOAT): Forecasted price in Rp/kWh
 
-## 🚀 API Endpoints
+## API Endpoints
 
 ### Electricity Data
 - `GET /api/prices` - Historical electricity prices
@@ -205,7 +274,12 @@ The CO₂ calculations in the LED-Übersicht tool use an estimated value of **0.
 - `GET /api/predictions/summary` - Aggregated forecasts by year/scenario
 - `GET /api/predictions/scenarios` - Available scenarios
 
-## 🔮 Future Enhancements
+## Documentation
+
+### Additional Resources
+- **Disposition**: Available at `/puplic/G2_Smart_Living_Disposition.pdf` - Project planning and methodology
+- **Academic Work**: Available at `/puplic/XXX` ToDo - Detailed academic documentation
+## Future Enhancements
 
 ### Data Sources
 - Integration with real-time electricity market data
@@ -222,17 +296,23 @@ The CO₂ calculations in the LED-Übersicht tool use an estimated value of **0.
 - Caching layer for improved performance
 - Mobile app development
 
-## 📄 License
+## License
 
 This project is developed for the ZHAW BW-SMART research project. Please contact the project maintainers for licensing information.
 
-## 🏫 Academic Context
+## Academic Context
 
 **Institution**: Zurich University of Applied Sciences (ZHAW)  
-**Project**: BW-SMART ToDo  
-**Focus**: Intelligent energy management and cost optimization for commercial buildings
+**Project**: BW-SMART - ToDo  
+**Focus**: ToDo
 
+## Contributors
+
+Developed by Group 2 for the ZHAW BW-SMART project.
+
+- Arnel Deomic
+- Damian Aklin
+- Jason Nquyen
+- Philipp Schiess
 
 ---
-
-ToDo
