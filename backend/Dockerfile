@@ -9,8 +9,8 @@ COPY . .
 
 RUN mkdir -p instance
 
-# Import initial data
-RUN python import_led_data.py && python import_electric_price_data.py
+# Import initial data and generate predictions
+# RUN python setup_data.py
 
 EXPOSE 5001
 

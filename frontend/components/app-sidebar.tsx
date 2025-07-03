@@ -31,9 +31,9 @@ const navMain = [
         url: "/tool",
         items: [
             { title: "Strompreis-Analyse", url: "/tool/strompreise", isActive: true },
-            { title: "LED-Amortisation", url: "/tool/amortisation" },
-            { title: "Szenario-Vergleich", url: "/tool/szenarien" },
+            { title: "Historie-Rechner", url: "/tool/amortisation" },
             { title: "Prognose-Rechner", url: "/tool/vorhersage" },
+            { title: "Szenario-Vergleich", url: "/tool/szenarien" },
         ],
     },
 ];

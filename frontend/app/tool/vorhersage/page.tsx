@@ -10,6 +10,8 @@ import { Cat } from '@/app/types/categories'
 import FilterPanelVorhersage from '@/components/vorhersage/filter-panel-vorhersage'
 import PredictionChart from '@/components/vorhersage/prediction-chart'
 import PredictionInfoPanel from '@/components/vorhersage/prediction-info-panel'
+import AmortisationChart from '@/components/vorhersage/amortisation-chart'
+import AmortisationInfo from '@/components/vorhersage/amortisation-info'
 
 const LS_KEY = "vorhersage-filter-v1"
 
@@ -38,6 +40,7 @@ export default function VorhersagePage() {
   const [selectedCategory, setSelectedCategory] = useState<Cat>(init.category ?? 'C3')
   const [selectedLamps, setSelectedLamps] = useState<string[]>(init.lamps ?? [])
   const [installYear, setInstallYear] = useState<number>(init.year ?? 2025)
+  const [selectedScenario, setSelectedScenario] = useState<'konservativ' | 'mittel' | 'optimistisch'>(init.scenario ?? 'mittel')
   const [predictionData, setPredictionData] = useState<PredictionData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -47,8 +50,9 @@ export default function VorhersagePage() {
     canton: selectedCanton,
     category: selectedCategory,
     lamps: selectedLamps,
-    year: installYear
-  }), [selectedCanton, selectedCategory, selectedLamps, installYear])
+    year: installYear,
+    scenario: selectedScenario
+  }), [selectedCanton, selectedCategory, selectedLamps, installYear, selectedScenario])
 
   const fetchPredictions = useCallback(async () => {
     if (!selectedCanton) return
@@ -133,7 +137,7 @@ export default function VorhersagePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">LED Amortisation mit Prognose-Preisen (2025-2040)</h1>
+      <h1 className="text-2xl font-semibold">Prognose-Rechner</h1>
 
       <FilterPanelVorhersage
         canton={selectedCanton}
@@ -198,11 +202,38 @@ export default function VorhersagePage() {
                 Punkt = Break-Even (Jahre relativ zum Einbau).
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-[380px] overflow-visible">
-              {/* TODO: AmortisationChart component will go here */}
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                Amortisations-Chart wird hier implementiert
+            <CardContent className="space-y-4">
+              {/* Scenario Selector */}
+              <div className="flex items-center space-x-4">
+                <label className="text-sm font-medium">Szenario:</label>
+                <select 
+                  value={selectedScenario}
+                  onChange={(e) => setSelectedScenario(e.target.value as 'konservativ' | 'mittel' | 'optimistisch')}
+                  className="px-3 py-2 border rounded-md bg-background"
+                >
+                  <option value="konservativ">Konservativ</option>
+                  <option value="mittel">Mittel</option>
+                  <option value="optimistisch">Optimistisch</option>
+                </select>
               </div>
+              
+              {/* Amortisation Chart */}
+              <AmortisationChart
+                predictionData={predictionData}
+                selectedLamps={selectedLamps}
+                installYear={installYear}
+                scenario={selectedScenario}
+                baseline={baseline}
+                tubes={tubes}
+              />
+              
+              {/* LED Information Cards */}
+              <AmortisationInfo
+                selectedLamps={selectedLamps}
+                baseline={baseline}
+                tubes={tubes}
+                predictionData={predictionData}
+              />
             </CardContent>
           </Card>
         </>

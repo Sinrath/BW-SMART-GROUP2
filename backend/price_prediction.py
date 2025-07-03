@@ -45,36 +45,57 @@ print(f"Number of records: {len(df)}")
 print()
 
 
+def holt_winters_forecast(ts, periods):
+    """
+    Holt-Winters forecast with estimated initialization and stronger damping
+    """
+    model = ExponentialSmoothing(
+        ts,
+        trend='add',
+        seasonal=None,
+        damped_trend=True,
+        initialization_method='estimated'
+    )
+    # Use stronger damping and limit trend growth
+    fit = model.fit(optimized=True, damping_trend=0.8)  # Strong damping
+    forecast = fit.forecast(periods)
+    
+    # Apply economic constraints - limit annual growth to max 10%
+    constrained_forecast = []
+    last_value = ts.iloc[-1]
+    
+    for i, value in enumerate(forecast):
+        if i == 0:
+            # First year: allow up to 50% growth from last historical value
+            max_growth = last_value * 1.5
+            constrained_value = min(value, max_growth)
+        else:
+            # Subsequent years: max 10% growth from previous forecast
+            max_growth = constrained_forecast[i-1] * 1.1
+            constrained_value = min(value, max_growth)
+        
+        constrained_forecast.append(constrained_value)
+    
+    # Return as pandas Series with same index as original forecast
+    return pd.Series(constrained_forecast, index=forecast.index)
+
+
+def create_scenarios(base_forecast, adjustment=0.2):
+    """
+    Creates optimistic, medium and conservative scenarios
+    adjustment: +/- 20% adjustment
+    """
+    return {
+        'konservativ': base_forecast * (1 - adjustment),
+        'mittel': base_forecast,
+        'optimistisch': base_forecast * (1 + adjustment)
+    }
+
+
 class ElectricityPriceForecast:
     def __init__(self, data):
         self.df = data.copy()
         self.forecasts = {}
-
-    def holt_winters_forecast(self, ts, periods):
-        """
-        Holt-Winters forecast with estimated initialization
-        """
-        model = ExponentialSmoothing(
-            ts,
-            trend='add',
-            seasonal=None,
-            damped_trend=True,
-            initialization_method='estimated'
-        )
-        fit = model.fit(optimized=True)
-        return fit.forecast(periods)
-
-
-    def create_scenarios(self, base_forecast, adjustment=0.2):
-        """
-        Creates optimistic, medium and conservative scenarios
-        adjustment: +/- 20% adjustment
-        """
-        return {
-            'konservativ': base_forecast * (1 - adjustment),
-            'mittel': base_forecast,
-            'optimistisch': base_forecast * (1 + adjustment)
-        }
 
     def forecast_all_cantons(self, start=2025, end=2040):
         """
@@ -112,6 +133,11 @@ class ElectricityPriceForecast:
                                                 format='%Y')
                 ts = pd.Series(subset['total'].values,
                                index=datetime_index).asfreq('AS')
+                
+                # Fill missing years with linear interpolation
+                if ts.isna().any():
+                    print(f"  Interpolating {ts.isna().sum()} missing years for {canton}, {category}")
+                    ts = ts.interpolate(method='linear')
 
                 # Skip flat series
                 if ts.std() < 0.01:
@@ -120,7 +146,7 @@ class ElectricityPriceForecast:
                     continue
 
                 # Use Holt-Winters forecasting
-                base_forecast = self.holt_winters_forecast(ts, periods)
+                base_forecast = holt_winters_forecast(ts, periods)
                 method = "Holt-Winters"
 
                 print(f"  {method} successful for {canton}, {category}")
@@ -130,7 +156,7 @@ class ElectricityPriceForecast:
                 base_forecast.index = future_years
 
                 # Create scenarios
-                scenarios = self.create_scenarios(base_forecast)
+                scenarios = create_scenarios(base_forecast)
 
                 results[canton][category] = {
                     'historical': ts.rename_axis('period'),

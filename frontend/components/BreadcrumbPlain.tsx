@@ -9,7 +9,7 @@ const segmentLabels: Record<string, string> = {
     arbeit: "Wissenschaftliche Arbeit",
     tool: "Analysen",
     strompreise: "Strompreis-Analyse",
-    amortisation: "LED-Amortisation",
+    amortisation: "Historie-Rechner",
     szenarien: "Szenario-Vergleich",
     vorhersage: "Prognose-Rechner",
 }

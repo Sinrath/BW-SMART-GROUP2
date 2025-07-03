@@ -165,7 +165,7 @@ export default function AmortisationPage() {
     /* ───── UI ──────────────────────────────────────────────── */
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-semibold">Amortisations-Graf</h1>
+            <h1 className="text-2xl font-semibold">Historie-Rechner</h1>
 
             <FilterPanelAmortisation
                 canton={canton} onCantonChange={setCan}
