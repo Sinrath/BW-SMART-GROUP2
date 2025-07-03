@@ -70,10 +70,12 @@ export default function AmortisationChart({
   const BASE = { price: baseline.price, watt: baseline.watt }
   const LAMPS = tubes.filter(t => !t.isBaseline).reduce((acc, tube) => {
     const key = tube.name.toLowerCase().replace(/[^a-z]/g, '')
+    // Calculate effective wattage based on efficiency
+    const effectiveWatt = tube.watt * (1 - tube.efficiency / 100)
     acc[key] = {
       label: tube.name,
       price: tube.price,
-      watt: tube.watt
+      watt: effectiveWatt
     }
     return acc
   }, {} as Record<string, { label: string; price: number; watt: number }>)
