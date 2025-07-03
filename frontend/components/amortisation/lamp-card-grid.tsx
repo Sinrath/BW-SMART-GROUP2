@@ -25,7 +25,7 @@ export function LampCardGrid({
                                  maxYears,
                              }: {
     baseline: { price:number; watt:number }
-    lamps:    { id:string; label:string; price:number; watt:number }[]
+    lamps:    { id:string; label:string; price:number; watt:number; originalWatt:number; efficiency:number }[]
     breakEvens: Record<string,number|null>
     maxYears: number
 }) {
@@ -44,16 +44,17 @@ export function LampCardGrid({
             />
 
             {lamps.map(l=>{
+                // l.watt is already the effective wattage, l.originalWatt is the original
                 const savings = baseline.watt - l.watt
-                const savingsPercent = ((savings / baseline.watt) * 100).toFixed(1)
                 return (
                     <LampCard
                         key={l.id}
                         title={l.label}
                         rows={[
                             `Preis: ${l.price} CHF`,
-                            `Leistung: ${l.watt} W`,
-                            `Ersparnis: ${savings}W (${savingsPercent}%)`,
+                            `Leistung: ${l.originalWatt} W`,
+                            `Effizienz: ${l.efficiency}% (${l.watt.toFixed(1)} W)`,
+                            `Ersparnis: ${savings.toFixed(1)}W (ggü. Standard)`,
                             `Amortisation: ${
                                 breakEvens[l.id]!==null
                                     ? `${breakEvens[l.id]!.toFixed(1)} J`

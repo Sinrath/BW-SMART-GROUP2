@@ -97,13 +97,17 @@ export default function AmortisationPage() {
     const BASE = { price: baseline?.price || 0, watt: baseline?.watt || 0 }
     const LAMPS = tubes.filter(t => !t.isBaseline).reduce((acc, tube) => {
         const key = tube.name.toLowerCase().replace(/[^a-z]/g, '')
+        // Calculate effective wattage based on efficiency
+        const effectiveWatt = tube.watt * (1 - tube.efficiency / 100)
         acc[key] = {
             label: tube.name,
             price: tube.price,
-            watt: tube.watt
+            watt: effectiveWatt,
+            originalWatt: tube.watt,
+            efficiency: tube.efficiency
         }
         return acc
-    }, {} as Record<string, { label: string; price: number; watt: number }>)
+    }, {} as Record<string, { label: string; price: number; watt: number; originalWatt: number; efficiency: number }>)
     
     // Debug logging
     console.log('LAMPS object:', LAMPS)

@@ -74,13 +74,17 @@ export default function LedCardsWithAmortisation({
   const BASE = { price: baseline.price, watt: baseline.watt }
   const LAMPS = tubes.filter(t => !t.isBaseline).reduce((acc, tube) => {
     const key = tube.name.toLowerCase().replace(/[^a-z]/g, '')
+    // Calculate effective wattage based on efficiency
+    const effectiveWatt = tube.watt * (1 - tube.efficiency / 100)
     acc[key] = {
       label: tube.name,
       price: tube.price,
-      watt: tube.watt
+      watt: effectiveWatt,
+      originalWatt: tube.watt,
+      efficiency: tube.efficiency
     }
     return acc
-  }, {} as Record<string, { label: string; price: number; watt: number }>)
+  }, {} as Record<string, { label: string; price: number; watt: number; originalWatt: number; efficiency: number }>)
 
   // Get years from installYear to 2040 with prediction data
   const years = Object.keys(predictionData)
@@ -146,7 +150,9 @@ export default function LedCardsWithAmortisation({
     id,
     label: LAMPS[id as keyof typeof LAMPS].label,
     price: LAMPS[id as keyof typeof LAMPS].price,
-    watt: LAMPS[id as keyof typeof LAMPS].watt
+    watt: LAMPS[id as keyof typeof LAMPS].watt, // This is now effective wattage
+    originalWatt: LAMPS[id as keyof typeof LAMPS].originalWatt,
+    efficiency: LAMPS[id as keyof typeof LAMPS].efficiency
   }))
 
   const style: React.CSSProperties = {
@@ -164,8 +170,8 @@ export default function LedCardsWithAmortisation({
       />
 
       {lampData.map(lamp => {
+        // lamp.watt is already the effective wattage
         const savings = baseline.watt - lamp.watt
-        const savingsPercent = ((savings / baseline.watt) * 100).toFixed(1)
         const breakEven = breaks[lamp.id]
 
         return (
@@ -174,8 +180,9 @@ export default function LedCardsWithAmortisation({
             title={lamp.label}
             rows={[
               `Preis: ${lamp.price} CHF`,
-              `Leistung: ${lamp.watt} W`,
-              `Ersparnis: ${savings}W (${savingsPercent}%)`,
+              `Leistung: ${lamp.originalWatt} W`,
+              `Effizienz: ${lamp.efficiency}% (${lamp.watt.toFixed(1)} W)`,
+              `Ersparnis: ${savings.toFixed(1)}W (ggü. Standard)`,
               `Amortisation: ${breakEven !== null ? `${breakEven.toFixed(1)} J` : "≥ 15 J"}`
             ]}
           />
