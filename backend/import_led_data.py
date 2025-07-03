@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # LED tube data T8 LED tubes
 LED_TUBES_DATA = [
     {
-        'name': 'CorePro LEDtube 1500 mm 20 W 865',
+        'name': 'CorePro LEDtube',
         'brand': 'Philips',
         'price': 7.50,
         'watt': 20.0,
@@ -21,7 +21,7 @@ LED_TUBES_DATA = [
         'is_baseline': True
     },
     {
-        'name': 'SMART+ WiFi Tube T8 EM 1200 mm 18 W',
+        'name': 'SMART+ WiFi Tube',
         'brand': 'Ledvance',
         'price': 24.50,
         'watt': 18.0,
@@ -30,7 +30,7 @@ LED_TUBES_DATA = [
         'is_baseline': False
     },
     {
-        'name': 'SubstiTUBE T8 Motion Sensor 1500 mm 19 W',
+        'name': 'SubstiTUBE T8 LED',
         'brand': 'Osram',
         'price': 49.00,
         'watt': 19.3,
@@ -39,7 +39,7 @@ LED_TUBES_DATA = [
         'is_baseline': False
     },
     {
-        'name': 'MasterConnect LEDtube 1500 mm 25 W 865 (BT/Zigbee)',
+        'name': 'MasterConnect LEDtube',
         'brand': 'Philips',
         'price': 87.00,
         'watt': 25.0,

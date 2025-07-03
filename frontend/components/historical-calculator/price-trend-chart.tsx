@@ -23,12 +23,14 @@ export function PriceTrendChart({
 
     return (
         <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={data} margin={{ left: 40 }}>
+            <LineChart data={data} margin={{ left: 50, right: 30, top: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="year" />
                 <YAxis
-                    unit=" CHF/kWh"
                     tickFormatter={(v)=>v.toFixed(2)}
+                    label={{ value: 'CHF/kWh', angle: -90, position: 'insideLeft' }}
+                    domain={['dataMin', 'auto']}
+                    tickCount={5}
                 />
                 <Tooltip
                     formatter={(v:number)=> [`${v} CHF/kWh`]}

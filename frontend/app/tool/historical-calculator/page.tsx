@@ -220,10 +220,15 @@ export default function AmortisationPage() {
                         </CardHeader>
                         <CardContent className="h-[380px] overflow-visible pt-6">
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={rows} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                <LineChart data={rows} margin={{ top: 20, right: 30, left: 50, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3"/>
                                     <XAxis dataKey="year"/>
-                                    <YAxis unit=" CHF"/>
+                                    <YAxis 
+                                        tickFormatter={(value) => `${Math.round(value)}`}
+                                        label={{ value: 'CHF', angle: -90, position: 'insideLeft' }}
+                                        domain={[0, 'auto']}
+                                        tickCount={5}
+                                    />
                                     <Tooltip
                                         formatter={(v:number)=>[`${v} CHF`]}
                                         labelFormatter={(l)=>`Kalenderjahr ${l}`}

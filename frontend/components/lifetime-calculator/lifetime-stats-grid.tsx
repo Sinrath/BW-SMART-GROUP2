@@ -42,8 +42,10 @@ export function LifetimeStatsGrid({
     // Calculate total electricity costs over lifetime
     const calculateElectricityCost = (tube: LedTube) => {
         let totalCost = 0
+        // Apply efficiency reduction for smart LEDs
+        const effectiveWatt = tube.efficiency > 0 ? tube.watt * (1 - tube.efficiency / 100) : tube.watt
         for (const price of electricityPrices) {
-            const yearlyConsumption = (tube.watt * runtimeHours) / 1000 // kWh
+            const yearlyConsumption = (effectiveWatt * runtimeHours) / 1000 // kWh
             const yearlyPrice = price.total / 100 // CHF/kWh
             totalCost += yearlyConsumption * yearlyPrice
         }

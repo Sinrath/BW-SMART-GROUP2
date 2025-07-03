@@ -53,9 +53,12 @@ export function LifetimeComparisonChart({
             if (priceDataForYear && year > installYear) {
                 const electricityPricePerKWh = priceDataForYear.total / 100 // CHF/kWh
                 
-                // Calculate yearly electricity costs
-                const selectedYearlyElectricity = (selectedTube.watt * runtimeHours / 1000) * electricityPricePerKWh
-                const baselineYearlyElectricity = (baseline.watt * runtimeHours / 1000) * electricityPricePerKWh
+                // Calculate yearly electricity costs with efficiency applied
+                const selectedEffectiveWatt = selectedTube.efficiency > 0 ? selectedTube.watt * (1 - selectedTube.efficiency / 100) : selectedTube.watt
+                const baselineEffectiveWatt = baseline.efficiency > 0 ? baseline.watt * (1 - baseline.efficiency / 100) : baseline.watt
+                
+                const selectedYearlyElectricity = (selectedEffectiveWatt * runtimeHours / 1000) * electricityPricePerKWh
+                const baselineYearlyElectricity = (baselineEffectiveWatt * runtimeHours / 1000) * electricityPricePerKWh
                 
                 selectedCumulativeCost += selectedYearlyElectricity
                 baselineCumulativeCost += baselineYearlyElectricity
@@ -95,7 +98,7 @@ export function LifetimeComparisonChart({
                             margin={{
                                 top: 10,
                                 right: 30,
-                                left: 0,
+                                left: 50,
                                 bottom: 0,
                             }}
                         >
@@ -106,7 +109,10 @@ export function LifetimeComparisonChart({
                             />
                             <YAxis 
                                 tick={{ fontSize: 12 }}
-                                tickFormatter={(value) => `${value} CHF`}
+                                tickFormatter={(value) => `${Math.round(value)}`}
+                                label={{ value: 'CHF', angle: -90, position: 'insideLeft' }}
+                                domain={[0, 'auto']}
+                                tickCount={5}
                             />
                             <Tooltip 
                                 formatter={formatTooltip}
