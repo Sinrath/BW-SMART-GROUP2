@@ -30,10 +30,10 @@ const navMain = [
         title: "Analysen",
         url: "/tool",
         items: [
-            { title: "Strompreis-Analyse", url: "/tool/strompreise", isActive: true },
-            { title: "Historie-Rechner", url: "/tool/amortisation" },
-            { title: "Prognose-Rechner", url: "/tool/vorhersage" },
-            { title: "Szenario-Vergleich", url: "/tool/szenarien" },
+            { title: "Strompreis-Analyse", url: "/tool/price-analysis", isActive: true },
+            { title: "Historie-Rechner", url: "/tool/historical-calculator" },
+            { title: "Prognose-Rechner", url: "/tool/prediction-calculator" },
+            { title: "Szenario-Vergleich", url: "/tool/canton-comparison" },
         ],
     },
 ];

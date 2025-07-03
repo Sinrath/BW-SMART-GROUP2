@@ -14,9 +14,9 @@ import {
 import { useElectricityData } from "@/app/hooks/useElectricityData"
 import { useLedTubeData } from "@/app/hooks/useLedTubeData"
 import { Cat } from "@/app/types/categories"
-import { FilterPanelAmortisation } from "@/components/amortisation/filter-panel-amortisation"
-import { LampCardGrid } from "@/components/amortisation/lamp-card-grid"
-import { PriceTrendChart } from "@/components/amortisation/price-trend-chart"
+import { FilterPanelAmortisation } from "@/components/historical-calculator/filter-panel-amortisation"
+import { LampCardGrid } from "@/components/historical-calculator/lamp-card-grid"
+import { PriceTrendChart } from "@/components/historical-calculator/price-trend-chart"
 
 const RUNTIME = 6000                     // h/Jahr
 const LS_KEY  = "amort-filter-v2"
@@ -218,9 +218,9 @@ export default function AmortisationPage() {
                                 Punkt = Break-Even (Jahre relativ zum Einbau).
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="h-[380px] overflow-visible">
+                        <CardContent className="h-[380px] overflow-visible pt-6">
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={rows}>
+                                <LineChart data={rows} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3"/>
                                     <XAxis dataKey="year"/>
                                     <YAxis unit=" CHF"/>

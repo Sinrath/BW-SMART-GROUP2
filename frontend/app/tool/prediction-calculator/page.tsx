@@ -7,11 +7,11 @@ import { TriangleAlert } from 'lucide-react'
 import { useElectricityData } from '@/app/hooks/useElectricityData'
 import { useLedTubeData } from '@/app/hooks/useLedTubeData'
 import { Cat } from '@/app/types/categories'
-import FilterPanelVorhersage from '@/components/vorhersage/filter-panel-vorhersage'
-import PredictionChart from '@/components/vorhersage/prediction-chart'
-import PredictionInfoPanel from '@/components/vorhersage/prediction-info-panel'
-import AmortisationChart from '@/components/vorhersage/amortisation-chart'
-import LedCardsWithAmortisation from '@/components/vorhersage/led-cards-with-amortisation'
+import FilterPanelVorhersage from '@/components/prediction-calculator/filter-panel-vorhersage'
+import PredictionChart from '@/components/prediction-calculator/prediction-chart'
+import PredictionInfoPanel from '@/components/prediction-calculator/prediction-info-panel'
+import AmortisationChart from '@/components/prediction-calculator/amortisation-chart'
+import LedCardsWithAmortisation from '@/components/prediction-calculator/led-cards-with-amortisation'
 
 const LS_KEY = "vorhersage-filter-v1"
 

@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/co
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { TriangleAlert } from "lucide-react"
 
-import { FilterPanel } from "@/components/strompreise/filter-panel"
-import { TrendChart } from "@/components/strompreise/trend-chart"
-import { ComponentChart } from "@/components/strompreise/component-chart"
+import { FilterPanel } from "@/components/price-analysis/filter-panel"
+import { TrendChart } from "@/components/price-analysis/trend-chart"
+import { ComponentChart } from "@/components/price-analysis/component-chart"
 import { useElectricityData } from "@/app/hooks/useElectricityData"
 import { Cat } from "@/app/types/categories";
-import { PriceSpreadChart } from "@/components/strompreise/price-spread-chart";
-import { RadarCard } from "@/components/strompreise/radar-chart";
+import { PriceSpreadChart } from "@/components/price-analysis/price-spread-chart";
+import { RadarCard } from "@/components/price-analysis/radar-chart";
 
 export default function StrompreisExplorerPage() {
     const { data: DEMO, loading, error } = useElectricityData()

@@ -17,7 +17,7 @@ import { ElectricityData } from "@/app/services/api"
 import {Cat} from "@/app/types/categories"
 import {
     FilterPanelScenarios
-} from "@/components/szenarien/filter-panel-scenarios"
+} from "@/components/canton-comparison/filter-panel-scenarios"
 
 const LS_KEY = "scen-filter-v1"
 const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#c026d3"]
@@ -51,8 +51,11 @@ function payback(
     let smart = lamp.price
     for (let i = idx; i < serie.length; i++) {
         const p = serie[i].total / 100
-        led += (BASE.watt * runtime) / 1000 * p
-        smart += (lamp.watt * runtime) / 1000 * p
+        // Add electricity costs only after the first year (index > 0 relative to installation)
+        if (i > idx) {
+            led += (BASE.watt * runtime) / 1000 * p
+            smart += (lamp.watt * runtime) / 1000 * p
+        }
         if (smart <= led) {
             const rel = i - idx   // Jahre seit Installation
             return Math.min(rel, MAX_YEARS)
@@ -108,10 +111,12 @@ export default function ScenarioPage() {
     const BASE = baseline ? { price: baseline.price, watt: baseline.watt } : { price: 20, watt: 18 }
     const LAMPS = tubes.filter(t => !t.isBaseline).reduce((acc, tube) => {
         const key = tube.name.toLowerCase().replace(/[^a-z]/g, '')
+        // Calculate effective wattage based on efficiency
+        const effectiveWatt = tube.watt * (1 - tube.efficiency / 100)
         acc[key] = {
             label: tube.name,
             price: tube.price,
-            watt: tube.watt
+            watt: effectiveWatt
         }
         return acc
     }, {} as Record<string, { label: string; price: number; watt: number }>)
@@ -175,9 +180,9 @@ export default function ScenarioPage() {
                             {runtime.toLocaleString("de-CH")} h jährlich
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="h-[420px]">
+                    <CardContent className="h-[420px] pt-6">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={rows} layout="vertical">
+                            <BarChart data={rows} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3"/>
                                 <XAxis type="number" domain={[0, MAX_YEARS]}
                                        tickFormatter={(v) => `${v} J`}/>

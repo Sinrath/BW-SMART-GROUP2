@@ -8,10 +8,10 @@ const segmentLabels: Record<string, string> = {
     disposition: "Disposition",
     arbeit: "Wissenschaftliche Arbeit",
     tool: "Analysen",
-    strompreise: "Strompreis-Analyse",
-    amortisation: "Historie-Rechner",
-    szenarien: "Szenario-Vergleich",
-    vorhersage: "Prognose-Rechner",
+    "price-analysis": "Strompreis-Analyse",
+    "historical-calculator": "Historie-Rechner",
+    "canton-comparison": "Szenario-Vergleich",
+    "prediction-calculator": "Prognose-Rechner",
 }
 
 export function BreadcrumbPlain() {
