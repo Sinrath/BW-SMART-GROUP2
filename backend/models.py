@@ -61,3 +61,33 @@ class LedTube(db.Model):
             'efficiency': self.efficiency,
             'isBaseline': self.is_baseline
         }
+
+
+class ElectricityPricePrediction(db.Model):
+    __tablename__ = 'electricity_price_predictions'
+
+    id = db.Column(db.Integer, primary_key=True)
+    period = db.Column(db.String(4), nullable=False)  # Year as string
+    canton = db.Column(db.String(2), nullable=False)
+    canton_label = db.Column(db.String(50), nullable=False)
+    category = db.Column(db.String(10), nullable=False)
+    scenario = db.Column(db.String(20), nullable=False)  # 'konservativ', 'mittel', 'optimistisch'
+    predicted_total = db.Column(db.Float, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Create compound index for efficient queries
+    __table_args__ = (
+        db.Index('idx_canton_period_category_scenario', 'canton', 'period', 'category', 'scenario'),
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'period': self.period,
+            'canton': self.canton,
+            'cantonLabel': self.canton_label,
+            'category': self.category,
+            'scenario': self.scenario,
+            'predictedTotal': self.predicted_total,
+            'createdAt': self.created_at.isoformat() if self.created_at else None
+        }
