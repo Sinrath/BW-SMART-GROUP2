@@ -103,12 +103,17 @@ export default function LedCardsWithAmortisation({
     let accLED = BASE.price
     const accSmart: Record<string, number> = {}
 
-    const rows = years.map((year) => {
+    const rows = years.map((year, index) => {
       const predictionValue = predictionData[year.toString()]?.[scenario]
       if (!predictionValue) return { year, LED: accLED }
 
       const p = predictionValue / 100 // Convert Rp/kWh to CHF/kWh
-      accLED += (BASE.watt * RUNTIME) / 1000 * p
+      
+      // Add electricity costs only after the first year
+      if (index > 0) {
+        accLED += (BASE.watt * RUNTIME) / 1000 * p
+      }
+      
       const r: {year: number; LED: number; [key: string]: number} = { 
         year, 
         LED: +accLED.toFixed(2) 
@@ -118,7 +123,11 @@ export default function LedCardsWithAmortisation({
         const l = LAMPS[id as keyof typeof LAMPS]
         if (!l) return // Skip if lamp not found
         if (accSmart[id] === undefined) accSmart[id] = l.price
-        accSmart[id] += (l.watt * RUNTIME) / 1000 * p
+        
+        // Add electricity costs only after the first year
+        if (index > 0) {
+          accSmart[id] += (l.watt * RUNTIME) / 1000 * p
+        }
         r[id] = +accSmart[id].toFixed(2)
       })
       return r
