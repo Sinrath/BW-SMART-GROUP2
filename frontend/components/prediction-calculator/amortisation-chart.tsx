@@ -170,7 +170,7 @@ export default function AmortisationChart({
   return (
     <div className="pt-4">
       <ResponsiveContainer width="100%" height={380}>
-      <LineChart data={rows} margin={{ top: 20, right: 30, left: 50, bottom: 5 }}>
+      <LineChart data={rows} margin={{ top: 20, right: 30, left: 30, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="year" />
         <YAxis 

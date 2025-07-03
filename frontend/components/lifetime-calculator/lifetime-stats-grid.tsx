@@ -44,10 +44,17 @@ export function LifetimeStatsGrid({
         let totalCost = 0
         // Apply efficiency reduction for smart LEDs
         const effectiveWatt = tube.efficiency > 0 ? tube.watt * (1 - tube.efficiency / 100) : tube.watt
-        for (const price of electricityPrices) {
-            const yearlyConsumption = (effectiveWatt * runtimeHours) / 1000 // kWh
-            const yearlyPrice = price.total / 100 // CHF/kWh
-            totalCost += yearlyConsumption * yearlyPrice
+        
+        // Use same year range as chart: installYear to endYear
+        for (let year = installYear; year <= endYear; year++) {
+            const priceDataForYear = electricityPrices.find(p => p.year === year)
+            
+            // Add electricity costs only after the first year (same logic as chart)
+            if (priceDataForYear && year > installYear) {
+                const yearlyConsumption = (effectiveWatt * runtimeHours) / 1000 // kWh
+                const yearlyPrice = priceDataForYear.total / 100 // CHF/kWh
+                totalCost += yearlyConsumption * yearlyPrice
+            }
         }
         return totalCost
     }

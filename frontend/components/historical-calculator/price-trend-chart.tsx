@@ -23,7 +23,7 @@ export function PriceTrendChart({
 
     return (
         <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={data} margin={{ left: 50, right: 30, top: 20, bottom: 5 }}>
+            <LineChart data={data} margin={{ left: 30, right: 30, top: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="year" />
                 <YAxis

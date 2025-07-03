@@ -26,7 +26,7 @@ export function ComponentChart({
     const chartData = [{ name: "Preis", ...data }]
     return (
         <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ left: 40 }}>
+            <BarChart data={chartData} margin={{ left: 30 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis unit=" Rp." />

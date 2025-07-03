@@ -109,27 +109,40 @@ export function ReplacementSchedule({
     // Environmental impact calculations
     const environmentalImpact = React.useMemo(() => {
         const co2PerKWh = 0.1 // kg CO2 per kWh (Swiss electricity mix estimate)
+        const manufacturingCO2PerLED = 2.0 // kg CO2 per LED manufacturing (estimate)
         const analysisYears = 20
         
-        // Selected lamp energy over 20 years
-        const selectedReplacements = selectedSchedule.length - 1 // Exclude initial installation
-        const selectedTotalYears = analysisYears
-        const selectedEnergyConsumption = (selectedTube.watt * runtimeHours * selectedTotalYears) / 1000 // kWh
-        const selectedCo2Emissions = selectedEnergyConsumption * co2PerKWh
+        // Calculate total LED units needed over 20 years (including initial + replacements)
+        const selectedTotalLEDs = selectedSchedule.length // Initial + replacements
+        const baselineTotalLEDs = baselineSchedule.length // Initial + replacements
         
-        // Baseline lamp energy over 20 years
-        const baselineReplacements = baselineSchedule.length - 1 // Exclude initial installation
-        const baselineTotalYears = analysisYears
-        const baselineEnergyConsumption = (baseline.watt * runtimeHours * baselineTotalYears) / 1000 // kWh
-        const baselineCo2Emissions = baselineEnergyConsumption * co2PerKWh
+        // Energy consumption over 20 years (continuous operation)
+        const selectedEnergyConsumption = (selectedTube.watt * runtimeHours * analysisYears) / 1000 // kWh
+        const baselineEnergyConsumption = (baseline.watt * runtimeHours * analysisYears) / 1000 // kWh
+        
+        // CO2 from energy consumption
+        const selectedEnergyCO2 = selectedEnergyConsumption * co2PerKWh
+        const baselineEnergyCO2 = baselineEnergyConsumption * co2PerKWh
+        
+        // CO2 from LED manufacturing (all LEDs needed over 20 years)
+        const selectedManufacturingCO2 = selectedTotalLEDs * manufacturingCO2PerLED
+        const baselineManufacturingCO2 = baselineTotalLEDs * manufacturingCO2PerLED
+        
+        // Total CO2 impact = Energy + Manufacturing
+        const selectedTotalCO2 = selectedEnergyCO2 + selectedManufacturingCO2
+        const baselineTotalCO2 = baselineEnergyCO2 + baselineManufacturingCO2
         
         return {
-            selectedCo2: selectedCo2Emissions.toFixed(1),
-            baselineCo2: baselineCo2Emissions.toFixed(1),
+            selectedCo2: selectedTotalCO2.toFixed(1),
+            baselineCo2: baselineTotalCO2.toFixed(1),
             energySavings: (baselineEnergyConsumption - selectedEnergyConsumption).toFixed(0),
-            co2Savings: (baselineCo2Emissions - selectedCo2Emissions).toFixed(1),
-            selectedReplacements,
-            baselineReplacements,
+            co2Savings: (baselineTotalCO2 - selectedTotalCO2).toFixed(1),
+            selectedReplacements: selectedTotalLEDs - 1, // Exclude initial installation for display
+            baselineReplacements: baselineTotalLEDs - 1, // Exclude initial installation for display
+            selectedEnergyCO2: selectedEnergyCO2.toFixed(1),
+            selectedManufacturingCO2: selectedManufacturingCO2.toFixed(1),
+            baselineEnergyCO2: baselineEnergyCO2.toFixed(1),
+            baselineManufacturingCO2: baselineManufacturingCO2.toFixed(1),
         }
     }, [selectedTube, baseline, runtimeHours, selectedSchedule.length, baselineSchedule.length])
 
@@ -221,8 +234,9 @@ export function ReplacementSchedule({
                 </div>
 
                 <div className="text-xs text-muted-foreground bg-yellow-50 p-3 rounded">
-                    <strong>Hinweis:</strong> CO₂-Werte basieren auf einer Schätzung von 0.1 kg CO₂/kWh für den Schweizer Strommix 
-                    und dienen nur zur Veranschaulichung.
+                    <strong>Hinweis:</strong> CO₂-Werte basieren auf Schätzungen von 0.1 kg CO₂/kWh für den Schweizer Strommix 
+                    und 2.0 kg CO₂ pro LED-Herstellung. Berechnung über 20 Jahre inklusive aller benötigten Ersatz-LEDs. 
+                    Werte dienen nur zur Veranschaulichung.
                 </div>
             </CardContent>
         </Card>
