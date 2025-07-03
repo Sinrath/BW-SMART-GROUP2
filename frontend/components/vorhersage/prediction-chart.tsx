@@ -1,28 +1,16 @@
 'use client'
 
 import React from 'react'
-import { Line } from 'react-chartjs-2'
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  ComposedChart,
+  Area,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
-  Legend,
-  ChartOptions
-} from 'chart.js'
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-)
+  ResponsiveContainer,
+} from "recharts"
 
 interface PredictionData {
   [year: string]: {
@@ -42,86 +30,22 @@ export default function PredictionChart({ data, loading }: PredictionChartProps)
   const prepareChartData = () => {
     if (!data) return null
 
-    const years = Object.keys(data).sort()
-    const konservativData = years.map(year => data[year].konservativ)
-    const mittelData = years.map(year => data[year].mittel)
-    const optimistischData = years.map(year => data[year].optimistisch)
-
-    return {
-      labels: years,
-      datasets: [
-        {
-          label: 'Konservativ (-20%)',
-          data: konservativData,
-          borderColor: 'rgb(239, 68, 68)', // red-500
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-          borderDash: [5, 5],
-          tension: 0.1
-        },
-        {
-          label: 'Mittlere Prognose',
-          data: mittelData,
-          borderColor: 'rgb(34, 197, 94)', // green-500
-          backgroundColor: 'rgba(34, 197, 94, 0.1)',
-          borderWidth: 3,
-          tension: 0.1
-        },
-        {
-          label: 'Optimistisch (+20%)',
-          data: optimistischData,
-          borderColor: 'rgb(59, 130, 246)', // blue-500
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          borderDash: [5, 5],
-          tension: 0.1
-        }
-      ]
-    }
-  }
-
-  const chartOptions: ChartOptions<'line'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: true,
-        text: 'Strompreisprognose 2025-2040',
-        font: {
-          size: 16
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            let label = context.dataset.label || ''
-            if (label) {
-              label += ': '
-            }
-            if (context.parsed.y !== null) {
-              label += context.parsed.y.toFixed(2) + ' Rp/kWh'
-            }
-            return label
-          }
-        }
+    const years = Object.keys(data).sort().map(Number)
+    
+    return years.map(year => {
+      const konservativ = data[year.toString()].konservativ
+      const optimistisch = data[year.toString()].optimistisch
+      const mittel = data[year.toString()].mittel
+      
+      return {
+        year,
+        konservativ,
+        mittel,
+        optimistisch,
+        // Calculate the difference between optimistisch and konservativ for proper stacking
+        rangeDiff: optimistisch - konservativ
       }
-    },
-    scales: {
-      y: {
-        beginAtZero: false,
-        title: {
-          display: true,
-          text: 'Strompreis (Rp/kWh)'
-        }
-      },
-      x: {
-        title: {
-          display: true,
-          text: 'Jahr'
-        }
-      }
-    }
+    })
   }
 
   const chartData = prepareChartData()
@@ -133,7 +57,56 @@ export default function PredictionChart({ data, loading }: PredictionChartProps)
           <p className="text-muted-foreground">Lade Prognosen...</p>
         </div>
       ) : chartData ? (
-        <Line data={chartData} options={chartOptions} />
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="year" />
+            <YAxis 
+              label={{ value: 'Rp/kWh', angle: -90, position: 'insideLeft' }}
+            />
+            <Tooltip 
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  const data = payload[0].payload
+                  return (
+                    <div className="bg-white p-3 border rounded shadow">
+                      <p className="font-medium">{`Jahr: ${label}`}</p>
+                      <p style={{ color: '#ef4444' }}>{`Hoch (+20%): ${data.optimistisch.toFixed(2)} Rp/kWh`}</p>
+                      <p style={{ color: '#1d4ed8' }}>{`Mittlere Prognose: ${data.mittel.toFixed(2)} Rp/kWh`}</p>
+                      <p style={{ color: '#22c55e' }}>{`Niedrig (-20%): ${data.konservativ.toFixed(2)} Rp/kWh`}</p>
+                    </div>
+                  )
+                }
+                return null
+              }}
+            />
+            {/* Base area starting from konservativ */}
+            <Area
+              type="monotone"
+              dataKey="konservativ"
+              stroke="transparent"
+              fill="transparent"
+              stackId="1"
+            />
+            {/* Range area on top of konservativ */}
+            <Area
+              type="monotone"
+              dataKey="rangeDiff"
+              stroke="transparent"
+              fill="#93c5fd"
+              fillOpacity={0.2}
+              stackId="1"
+            />
+            {/* Middle line for mittlere prognose */}
+            <Line
+              type="monotone"
+              dataKey="mittel"
+              stroke="#1d4ed8"
+              strokeWidth={3}
+              dot={{ r: 3, fill: "#1d4ed8" }}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
       ) : (
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground">Keine Daten verfügbar</p>

@@ -102,7 +102,7 @@ export default function VorhersagePage() {
           <h1 className="text-2xl font-semibold">Strompreis-Vorhersage</h1>
           <p className="text-muted-foreground max-w-3xl">
             Prognosen für die Entwicklung der Strompreise bis 2040 basierend auf historischen Daten
-            und linearer Extrapolation. Datenquelle:&nbsp;
+            und Holt-Winters Exponential Smoothing. Datenquelle:&nbsp;
             <a
               href="https://www.strompreis.elcom.admin.ch/"
               target="_blank"

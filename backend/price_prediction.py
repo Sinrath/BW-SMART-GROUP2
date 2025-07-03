@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import sqlite3
 from datetime import datetime
-from scipy import stats
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from flask import Flask
 from sqlalchemy import delete
@@ -65,19 +64,6 @@ class ElectricityPriceForecast:
         fit = model.fit(optimized=True)
         return fit.forecast(periods)
 
-    def linear_extrapolation(self, ts, periods):
-        """
-        Simple linear extrapolation as fallback
-        """
-        years = ts.index.year.values
-        values = ts.values
-        slope, intercept, r_value, p_value, std_err = stats.linregress(years,
-                                                                       values)
-        future_years = np.arange(years.max() + 1, years.max() + 1 + periods)
-        forecast = slope * future_years + intercept
-        # Ensure no negative prices
-        forecast = np.maximum(forecast, 0.0)
-        return pd.Series(forecast, index=future_years)
 
     def create_scenarios(self, base_forecast, adjustment=0.2):
         """
@@ -133,13 +119,9 @@ class ElectricityPriceForecast:
                         f"  WARNING: Little price variation for {canton}, {category}")
                     continue
 
-                # Try Holt-Winters first, fallback to linear
-                try:
-                    base_forecast = self.holt_winters_forecast(ts, periods)
-                    method = "Holt-Winters"
-                except Exception:
-                    base_forecast = self.linear_extrapolation(ts, periods)
-                    method = "Linear"
+                # Use Holt-Winters forecasting
+                base_forecast = self.holt_winters_forecast(ts, periods)
+                method = "Holt-Winters"
 
                 print(f"  {method} successful for {canton}, {category}")
 

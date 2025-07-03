@@ -1,7 +1,7 @@
 "use client"
 
 import {
-    AreaChart,
+    ComposedChart,
     Area,
     Line,
     XAxis,
@@ -65,30 +65,49 @@ export function PriceSpreadChart({
             min: min === Infinity ? null : +min.toFixed(2),
             max: max === -Infinity ? null : +max.toFixed(2),
             avg: count ? +(sum / count).toFixed(2) : null,
+            // Calculate the difference between max and min for proper stacking
+            rangeDiff: (min === Infinity || max === -Infinity) ? null : +(max - min).toFixed(2)
         }
     })
 
     return (
         <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={data}>
+            <ComposedChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="year" />
                 <YAxis unit=" Rp." />
-                <Tooltip />
-                {/* Band: max oben, min unten (gleiche Farbe → Fläche) */}
-                <Area
-                    type="monotone"
-                    dataKey="max"
-                    stroke="#93c5fd"
-                    fill="#93c5fd"
-                    fillOpacity={0.3}
+                <Tooltip 
+                    content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                            const data = payload[0].payload
+                            return (
+                                <div className="bg-white p-3 border rounded shadow">
+                                    <p className="font-medium">{`Jahr: ${label}`}</p>
+                                    <p style={{ color: '#ef4444' }}>{`Max: ${data.max?.toFixed(2) || 'N/A'} Rp/kWh`}</p>
+                                    <p style={{ color: '#1d4ed8' }}>{`Durchschnitt: ${data.avg?.toFixed(2) || 'N/A'} Rp/kWh`}</p>
+                                    <p style={{ color: '#22c55e' }}>{`Min: ${data.min?.toFixed(2) || 'N/A'} Rp/kWh`}</p>
+                                </div>
+                            )
+                        }
+                        return null
+                    }}
                 />
+                {/* Base area starting from min */}
                 <Area
                     type="monotone"
                     dataKey="min"
-                    stroke="#93c5fd"
-                    fill="#fff"
-                    fillOpacity={1}
+                    stroke="transparent"
+                    fill="transparent"
+                    stackId="1"
+                />
+                {/* Range area on top of min */}
+                <Area
+                    type="monotone"
+                    dataKey="rangeDiff"
+                    stroke="transparent"
+                    fill="#93c5fd"
+                    fillOpacity={0.2}
+                    stackId="1"
                 />
                 {/* Ø-Linie */}
                 <Line
@@ -98,7 +117,7 @@ export function PriceSpreadChart({
                     strokeWidth={2}
                     dot={{ r: 2 }}
                 />
-            </AreaChart>
+            </ComposedChart>
         </ResponsiveContainer>
     )
 }
