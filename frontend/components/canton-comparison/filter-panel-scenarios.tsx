@@ -56,6 +56,14 @@ export function FilterPanelScenarios({
             onLampsChange(validSelectedLamps)
         }
     }, [validLampIds.join(','), lamps.join(',')]) // eslint-disable-line react-hooks/exhaustive-deps
+    
+    // Reset installation year if it's too recent (need sufficient historical data for amortization)
+    React.useEffect(() => {
+        if (installYear > 2021) {
+            console.log('Resetting installation year from', installYear, 'to 2020 (insufficient historical data)')
+            onYearChange(2020)
+        }
+    }, [installYear, onYearChange])
 
     const toggleC=(c:string)=>{
         if(!DEMO[c]){ toast.error(`Keine Daten für ${c}`); return }
@@ -114,10 +122,13 @@ export function FilterPanelScenarios({
                         value={installYear}
                         onChange={(e)=>onYearChange(+e.target.value)}
                     >
-                        {Array.from({length:14},(_,i)=>2011+i).map(y=>(
+                        {Array.from({length:11},(_,i)=>2011+i).map(y=>(
                             <option key={y} value={y}>{y}</option>
                         ))}
                     </select>
+                    <div className="text-xs text-muted-foreground">
+                        Jahre ab 2022 haben unzureichende historische Daten für Amortisationsberechnungen
+                    </div>
                 </div>
 
                 {/* Smart-Lampenauswahl */}

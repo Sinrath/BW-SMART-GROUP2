@@ -34,6 +34,7 @@ const navMain = [
             { title: "Historie-Rechner", url: "/tool/historical-calculator" },
             { title: "Prognose-Rechner", url: "/tool/prediction-calculator" },
             { title: "Szenario-Vergleich", url: "/tool/canton-comparison" },
+            { title: "LED-Übersicht", url: "/tool/lifetime-calculator" },
         ],
     },
 ];

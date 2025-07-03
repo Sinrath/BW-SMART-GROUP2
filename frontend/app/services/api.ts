@@ -27,6 +27,7 @@ export interface LedTube {
   price: number;
   watt: number;
   efficiency: number;
+  lifetime: number;
   isBaseline: boolean;
 }
 

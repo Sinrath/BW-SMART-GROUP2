@@ -26,7 +26,7 @@ LED_TUBES_DATA = [
         'price': 35.0,
         'watt': 16.0,
         'efficiency': 21.0,
-        'lifetime': 50000,
+        'lifetime': 20000,
         'is_baseline': False
     },
     {
@@ -35,7 +35,7 @@ LED_TUBES_DATA = [
         'price': 45.0,
         'watt': 15.5,
         'efficiency': 33.0,
-        'lifetime': 50000,
+        'lifetime': 30000,
         'is_baseline': False
     },
     {
@@ -44,7 +44,7 @@ LED_TUBES_DATA = [
         'price': 55.0,
         'watt': 15.0,
         'efficiency': 55.0,
-        'lifetime': 50000,
+        'lifetime': 30000,
         'is_baseline': False
     },
     {
@@ -53,7 +53,7 @@ LED_TUBES_DATA = [
         'price': 65.0,
         'watt': 14.5,
         'efficiency': 81.0,
-        'lifetime': 50000,
+        'lifetime': 30000,
         'is_baseline': False
     },
     {
@@ -62,7 +62,7 @@ LED_TUBES_DATA = [
         'price': 75.0,
         'watt': 14.0,
         'efficiency': 90.0,
-        'lifetime': 50000,
+        'lifetime': 30000,
         'is_baseline': False
     }
 ]
