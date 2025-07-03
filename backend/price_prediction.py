@@ -1,14 +1,14 @@
-import pandas as pd
-import numpy as np
-import sqlite3
-from statsmodels.tsa.holtwinters import ExponentialSmoothing
-from scipy import stats
-import warnings
 import os
+import warnings
+import numpy as np
+import pandas as pd
+import sqlite3
 from datetime import datetime
+from scipy import stats
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from flask import Flask
-from models import db, ElectricityPricePrediction
 from sqlalchemy import delete
+from models import db, ElectricityPricePrediction
 
 warnings.filterwarnings('ignore')
 
@@ -28,21 +28,22 @@ conn = sqlite3.connect(db_path)
 
 # Load data from database
 query = """
-SELECT period, canton, canton_label, category, aidfee, charge, gridusage, energy, total
-FROM electricity_prices
-"""
+        SELECT period, canton, canton_label, category, total
+        FROM electricity_prices \
+        """
 df = pd.read_sql_query(query, conn)
 conn.close()
 
 # Convert data types
 df['period'] = df['period'].astype(int)
-df['total'] = pd.to_numeric(df['total'])
+df['total'] = pd.to_numeric(df['total'], errors='coerce')
 
 print("Data overview:")
 print(f"Period: {df['period'].min()}-{df['period'].max()}")
 print(f"Cantons: {df['canton_label'].nunique()}")
 print(f"Categories: {df['category'].unique()}")
 print(f"Number of records: {len(df)}")
+print()
 
 
 class ElectricityPriceForecast:
@@ -50,104 +51,33 @@ class ElectricityPriceForecast:
         self.df = data.copy()
         self.forecasts = {}
 
-    def holt_winters_forecast(self, canton, category, periods=16):
+    def holt_winters_forecast(self, ts, periods):
         """
-        Holt-Winters forecast for a canton and category
+        Holt-Winters forecast with estimated initialization
         """
-        # Filter data for specific canton and category
-        subset = self.df[
-            (self.df['canton_label'] == canton) &
-            (self.df['category'] == category)
-            ].copy()
+        model = ExponentialSmoothing(
+            ts,
+            trend='add',
+            seasonal=None,
+            damped_trend=True,
+            initialization_method='estimated'
+        )
+        fit = model.fit(optimized=True)
+        return fit.forecast(periods)
 
-        if len(subset) < 5:  # At least 5 data points required
-            print(f"Too few data points for {canton}, {category}: {len(subset)}")
-            return None
-
-        # Sort by year
-        subset = subset.sort_values('period')
-        
-        # Get canton code for database storage
-        canton_code = subset['canton'].iloc[0]
-
-        # Create time series
-        ts = subset.set_index('period')['total']
-
-        try:
-            # Try simple exponential smoothing first
-            model = ExponentialSmoothing(
-                ts,
-                trend='add',
-                seasonal=None,
-                damped_trend=False  # Try without damping first
-            )
-
-            fit = model.fit()
-
-            # Forecast for 2025-2040
-            forecast = fit.forecast(periods)
-
-            # Years for forecast
-            future_years = range(2025, 2025 + periods)
-            
-            # Check if forecast contains NaN values
-            forecast_series = pd.Series(forecast, index=future_years)
-            if forecast_series.isna().any():
-                print(f"  WARNING: NaN values in Holt-Winters forecast for {canton}, {category}")
-                print(f"  Using linear extrapolation as fallback")
-                return None  # This will trigger linear extrapolation
-
-            return {
-                'historical': ts,
-                'forecast': forecast_series,
-                'canton_code': canton_code
-            }
-
-        except Exception as e:
-            print(f"  Holt-Winters error for {canton}, {category}: {e}")
-            print(f"  Using linear extrapolation as fallback")
-            return None
-
-    def linear_extrapolation(self, canton, category, periods=16):
+    def linear_extrapolation(self, ts, periods):
         """
         Simple linear extrapolation as fallback
         """
-        subset = self.df[
-            (self.df['canton_label'] == canton) &
-            (self.df['category'] == category)
-            ].copy()
-
-        if len(subset) < 3:
-            print(f"  Too few data points for linear extrapolation: {len(subset)}")
-            return None
-
-        subset = subset.sort_values('period')
-        
-        # Get canton code for database storage
-        canton_code = subset['canton'].iloc[0]
-
-        # Linear regression
-        x = subset['period'].values
-        y = subset['total'].values
-
-        slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
-
-        # Forecast
-        future_years = np.array(range(2025, 2025 + periods))
+        years = ts.index.year.values
+        values = ts.values
+        slope, intercept, r_value, p_value, std_err = stats.linregress(years,
+                                                                       values)
+        future_years = np.arange(years.max() + 1, years.max() + 1 + periods)
         forecast = slope * future_years + intercept
-        
         # Ensure no negative prices
         forecast = np.maximum(forecast, 0.0)
-        
-        print(f"  Linear extrapolation successful: slope={slope:.4f}, R²={r_value**2:.4f}")
-
-        return {
-            'historical': subset.set_index('period')['total'],
-            'forecast': pd.Series(forecast, index=future_years),
-            'canton_code': canton_code,
-            'slope': slope,
-            'r_squared': r_value ** 2
-        }
+        return pd.Series(forecast, index=future_years)
 
     def create_scenarios(self, base_forecast, adjustment=0.2):
         """
@@ -160,10 +90,11 @@ class ElectricityPriceForecast:
             'optimistisch': base_forecast * (1 + adjustment)
         }
 
-    def forecast_all_cantons(self):
+    def forecast_all_cantons(self, start=2025, end=2040):
         """
         Creates forecasts for all cantons and categories
         """
+        periods = end - start + 1
         cantons = self.df['canton_label'].unique()
         categories = self.df['category'].unique()
 
@@ -175,25 +106,56 @@ class ElectricityPriceForecast:
             for category in categories:
                 print(f"Processing: {canton}, {category}")
 
-                # Try Holt-Winters first
-                forecast = self.holt_winters_forecast(canton, category)
+                # Filter data for specific canton and category
+                subset = self.df[
+                    (self.df['canton_label'] == canton) &
+                    (self.df['category'] == category)
+                    ].copy()
 
-                # If Holt-Winters fails, use linear extrapolation
-                if forecast is None:
-                    forecast = self.linear_extrapolation(canton, category)
+                if len(subset) < 5:  # At least 5 data points required
+                    print(
+                        f"  Too few data points for {canton}, {category}: {len(subset)}")
+                    continue
 
-                if forecast is not None:
-                    # Create scenarios
-                    scenarios = self.create_scenarios(forecast['forecast'])
-                    
-                    results[canton][category] = {
-                        'historical': forecast['historical'],
-                        'forecast_base': forecast['forecast'],
-                        'scenarios': scenarios,
-                        'canton_code': forecast['canton_code']
-                    }
-                else:
-                    print(f"  WARNING: No forecast for {canton}, {category}")
+                # Sort by year and get canton code
+                subset = subset.sort_values('period')
+                canton_code = subset['canton'].iloc[0]
+
+                # Build annual time series with proper frequency
+                datetime_index = pd.to_datetime(subset['period'].astype(str),
+                                                format='%Y')
+                ts = pd.Series(subset['total'].values,
+                               index=datetime_index).asfreq('AS')
+
+                # Skip flat series
+                if ts.std() < 0.01:
+                    print(
+                        f"  WARNING: Little price variation for {canton}, {category}")
+                    continue
+
+                # Try Holt-Winters first, fallback to linear
+                try:
+                    base_forecast = self.holt_winters_forecast(ts, periods)
+                    method = "Holt-Winters"
+                except Exception:
+                    base_forecast = self.linear_extrapolation(ts, periods)
+                    method = "Linear"
+
+                print(f"  {method} successful for {canton}, {category}")
+
+                # Set proper year index for forecasts
+                future_years = np.arange(start, end + 1)
+                base_forecast.index = future_years
+
+                # Create scenarios
+                scenarios = self.create_scenarios(base_forecast)
+
+                results[canton][category] = {
+                    'historical': ts.rename_axis('period'),
+                    'forecast_base': base_forecast,
+                    'scenarios': scenarios,
+                    'canton_code': canton_code
+                }
 
         self.forecasts = results
         return results
@@ -206,50 +168,43 @@ class ElectricityPriceForecast:
             # Delete old forecasts
             db.session.execute(delete(ElectricityPricePrediction))
             db.session.commit()
-            
+
             saved_count = 0
-            
+
             for canton, categories in self.forecasts.items():
                 for category, data in categories.items():
                     if 'scenarios' not in data:
                         continue
-                    
+
                     canton_code = data['canton_code']
-                    
+
                     # Save all scenarios
-                    for scenario_name, scenario_data in data['scenarios'].items():
-                        # Debug: Check the structure
-                        if isinstance(scenario_data, pd.Series):
-                            # Convert pandas Series to dict for iteration
-                            for year in scenario_data.index:
-                                value = scenario_data[year]
-                                if pd.notna(value):  # Check if value is not NaN
-                                    prediction = ElectricityPricePrediction(
-                                        period=str(year),
-                                        canton=str(canton_code),
-                                        canton_label=canton,
-                                        category=category,
-                                        scenario=scenario_name,
-                                        predicted_total=float(value),
-                                        created_at=datetime.utcnow()
-                                    )
-                                    db.session.add(prediction)
-                                    saved_count += 1
-                                else:
-                                    print(f"  WARNING: NaN value for {canton} {category} {scenario_name} {year}")
-                        else:
-                            print(f"  ERROR: Unexpected data type for scenario: {type(scenario_data)}")
-            
+                    for scenario_name, scenario_data in data[
+                        'scenarios'].items():
+                        for year, value in scenario_data.items():
+                            if pd.notna(value):  # Check if value is not NaN
+                                prediction = ElectricityPricePrediction(
+                                    period=str(year),
+                                    canton=str(canton_code),
+                                    canton_label=canton,
+                                    category=category,
+                                    scenario=scenario_name,
+                                    predicted_total=float(value),
+                                    created_at=datetime.utcnow()
+                                )
+                                db.session.add(prediction)
+                                saved_count += 1
+
             db.session.commit()
             print(f"\n{saved_count} forecasts saved to database.")
-            
+
             # Show sample forecasts
             sample = db.session.query(ElectricityPricePrediction).filter_by(
                 canton_label='Zürich',
                 category='C2',
                 period='2025'
             ).all()
-            
+
             print("\nSample forecasts for Zürich C2 in 2025:")
             for s in sample:
                 print(f"  {s.scenario}: {s.predicted_total:.2f} Rp/kWh")
@@ -261,11 +216,11 @@ if __name__ == "__main__":
     forecast = ElectricityPriceForecast(df)
 
     # Create forecasts for all cantons
-    print("\nCreating forecasts for all cantons...")
-    results = forecast.forecast_all_cantons()
+    print("Creating forecasts for all cantons...")
+    results = forecast.forecast_all_cantons(2025, 2040)
 
     # Save to database
     print("\nSaving forecasts to database...")
     forecast.save_to_database()
-    
+
     print("\nForecasts successfully created and saved!")

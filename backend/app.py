@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from models import db, ElectricityPrice, LedTube
+from models import db, ElectricityPrice, LedTube, ElectricityPricePrediction
 
 app = Flask(__name__)
 CORS(app, origins=['http://localhost:3000', 'http://127.0.0.1:3000', 'http://frontend:3000'])
@@ -118,6 +118,108 @@ def get_led_brands():
     brands = db.session.query(LedTube.brand).distinct().order_by(LedTube.brand).all()
     
     return jsonify([brand[0] for brand in brands])
+
+
+@app.route('/api/predictions')
+def get_predictions():
+    # Get query parameters
+    canton = request.args.get('canton')
+    period = request.args.get('period')
+    category = request.args.get('category', 'C3')  # Default to C3
+    scenario = request.args.get('scenario')  # konservativ, mittel, optimistisch
+    
+    # Build query
+    query = ElectricityPricePrediction.query
+    
+    if canton:
+        query = query.filter_by(canton=canton)
+    if period:
+        query = query.filter_by(period=period)
+    if category:
+        query = query.filter_by(category=category)
+    if scenario:
+        query = query.filter_by(scenario=scenario)
+    
+    # Execute query and return results
+    predictions = query.order_by(
+        ElectricityPricePrediction.period,
+        ElectricityPricePrediction.scenario
+    ).all()
+    
+    return jsonify({
+        "data": [pred.to_dict() for pred in predictions],
+        "count": len(predictions)
+    })
+
+
+@app.route('/api/predictions/summary')
+def get_predictions_summary():
+    # Get average predictions by year across all cantons
+    canton = request.args.get('canton')
+    category = request.args.get('category', 'C3')
+    
+    if canton:
+        # Get predictions for specific canton
+        predictions = db.session.query(
+            ElectricityPricePrediction.period,
+            ElectricityPricePrediction.scenario,
+            ElectricityPricePrediction.predicted_total
+        ).filter_by(
+            canton=canton,
+            category=category
+        ).order_by(
+            ElectricityPricePrediction.period,
+            ElectricityPricePrediction.scenario
+        ).all()
+    else:
+        # Get average predictions across all cantons
+        from sqlalchemy import func
+        predictions = db.session.query(
+            ElectricityPricePrediction.period,
+            ElectricityPricePrediction.scenario,
+            func.avg(ElectricityPricePrediction.predicted_total).label('predicted_total')
+        ).filter_by(
+            category=category
+        ).group_by(
+            ElectricityPricePrediction.period,
+            ElectricityPricePrediction.scenario
+        ).order_by(
+            ElectricityPricePrediction.period,
+            ElectricityPricePrediction.scenario
+        ).all()
+    
+    # Transform data into a more convenient format
+    result = {}
+    for period, scenario, total in predictions:
+        if period not in result:
+            result[period] = {}
+        result[period][scenario] = round(total, 2)
+    
+    return jsonify(result)
+
+
+@app.route('/api/predictions/cantons')
+def get_prediction_cantons():
+    # Get unique cantons that have predictions
+    cantons = db.session.query(
+        ElectricityPricePrediction.canton,
+        ElectricityPricePrediction.canton_label
+    ).distinct().order_by(ElectricityPricePrediction.canton).all()
+    
+    return jsonify([
+        {"value": canton, "label": label}
+        for canton, label in cantons
+    ])
+
+
+@app.route('/api/predictions/scenarios')
+def get_scenarios():
+    # Get available scenarios
+    scenarios = db.session.query(
+        ElectricityPricePrediction.scenario
+    ).distinct().order_by(ElectricityPricePrediction.scenario).all()
+    
+    return jsonify([scenario[0] for scenario in scenarios])
 
 
 if __name__ == '__main__':
