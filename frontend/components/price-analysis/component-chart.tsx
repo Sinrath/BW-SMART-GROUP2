@@ -26,15 +26,10 @@ export function ComponentChart({
     const chartData = [{ name: "Preis", ...data }]
     return (
         <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ left: 50, right: 5, top: 5, bottom: 5 }}>
+            <BarChart data={chartData} margin={{ left: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis 
-                    tickFormatter={(value) => `${Math.round(value)}`}
-                    label={{ value: 'Rp/kWh', angle: -90, position: 'insideLeft' }}
-                    domain={[0, 'auto']}
-                    tickCount={5}
-                />
+                <YAxis unit=" Rp." />
                 <Tooltip
                     formatter={(value: number, key: string) => [`${value} Rp.`, LABELS[key]]}
                 />

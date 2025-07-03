@@ -139,28 +139,32 @@ export function LifetimeComparisonChart({
                     </ResponsiveContainer>
                 </div>
                 
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="text-center">
-                        <div className="font-medium">Anfangskosten</div>
-                        <div className="text-muted-foreground">
-                            {selectedTube.name}: {selectedTube.price} CHF
-                        </div>
-                        <div className="text-muted-foreground">
-                            {baseline.name}: {baseline.price} CHF
-                        </div>
-                    </div>
-                    <div className="text-center">
-                        <div className="font-medium">Endkosten</div>
-                        <div className="text-muted-foreground">
-                            {selectedTube.name}: {chartData[chartData.length - 1]?.[selectedTube.name]} CHF
-                        </div>
-                        <div className="text-muted-foreground">
-                            {baseline.name}: {chartData[chartData.length - 1]?.[baseline.name]} CHF
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm border-t pt-4">
+                    <div className="text-center space-y-2">
+                        <div className="font-medium text-base mb-3">Anfangskosten</div>
+                        <div className="space-y-1">
+                            <div className="text-muted-foreground">
+                                <span className="font-medium">{selectedTube.name}:</span> {selectedTube.price} CHF
+                            </div>
+                            <div className="text-muted-foreground">
+                                <span className="font-medium">{baseline.name}:</span> {baseline.price} CHF
+                            </div>
                         </div>
                     </div>
-                    <div className="text-center">
-                        <div className="font-medium">Gesamteinsparung</div>
-                        <div className={`font-bold ${chartData[chartData.length - 1]?.savings >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className="text-center space-y-2">
+                        <div className="font-medium text-base mb-3">Endkosten</div>
+                        <div className="space-y-1">
+                            <div className="text-muted-foreground">
+                                <span className="font-medium">{selectedTube.name}:</span> {chartData[chartData.length - 1]?.[selectedTube.name]} CHF
+                            </div>
+                            <div className="text-muted-foreground">
+                                <span className="font-medium">{baseline.name}:</span> {chartData[chartData.length - 1]?.[baseline.name]} CHF
+                            </div>
+                        </div>
+                    </div>
+                    <div className="text-center space-y-2">
+                        <div className="font-medium text-base mb-3">Gesamteinsparung</div>
+                        <div className={`font-bold text-lg ${chartData[chartData.length - 1]?.savings >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {chartData[chartData.length - 1]?.savings >= 0 ? '+' : ''}
                             {chartData[chartData.length - 1]?.savings} CHF
                         </div>

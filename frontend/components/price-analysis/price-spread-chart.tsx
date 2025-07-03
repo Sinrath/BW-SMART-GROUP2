@@ -72,15 +72,10 @@ export function PriceSpreadChart({
 
     return (
         <ResponsiveContainer width="100%" height={300}>
-            <ComposedChart data={data} margin={{ left: 50, right: 5, top: 5, bottom: 5 }}>
+            <ComposedChart data={data} margin={{ left: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="year" />
-                <YAxis 
-                    tickFormatter={(value) => `${value.toFixed(2)}`}
-                    label={{ value: 'Rp/kWh', angle: -90, position: 'insideLeft' }}
-                    domain={['auto', 'auto']}
-                    tickCount={5}
-                />
+                <YAxis unit=" Rp." />
                 <Tooltip 
                     content={({ active, payload, label }) => {
                         if (active && payload && payload.length) {

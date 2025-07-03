@@ -60,7 +60,7 @@ export function FilterPanelLifetime({
             <CardHeader>
                 <CardTitle>Filter-Einstellungen</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="canton-select">Kanton</Label>
                     <Select value={canton} onValueChange={onCantonChange}>
@@ -107,7 +107,7 @@ export function FilterPanelLifetime({
                     </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 lg:col-span-1">
                     <Label htmlFor="year-input">Einbaujahr</Label>
                     <Input
                         id="year-input"
@@ -117,6 +117,7 @@ export function FilterPanelLifetime({
                         min={minYear}
                         max={maxYear}
                         placeholder="Jahr"
+                        className="w-24"
                     />
                     <p className="text-xs text-muted-foreground">
                         {minYear} - {maxYear}
