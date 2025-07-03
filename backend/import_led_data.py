@@ -9,60 +9,42 @@ from models import LedTube
 # Add the current directory to the Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# LED tube data - Realistic T8 LED tubes with smart features
+# LED tube data T8 LED tubes
 LED_TUBES_DATA = [
     {
-        'name': 'Standard LED Tube',
-        'brand': 'Generic',
-        'price': 20.0,
-        'watt': 18.0,
-        'efficiency': 0.0,  # Baseline = 0%
-        'lifetime': 50000,  # Lifetime in hours
+        'name': 'CorePro LEDtube 1500 mm 20 W 865',
+        'brand': 'Philips',
+        'price': 7.50,
+        'watt': 20.0,
+        'efficiency': 0.0,  # baseline
+        'lifetime': 50000,
         'is_baseline': True
     },
     {
-        'name': 'Smart LED Basic (Dimming)',
-        'brand': 'Signify',
-        'price': 35.0,
-        'watt': 16.0,
-        'efficiency': 21.0,
-        'lifetime': 20000,
+        'name': 'SMART+ WiFi Tube T8 EM 1200 mm 18 W',
+        'brand': 'Ledvance',
+        'price': 24.50,
+        'watt': 18.0,
+        'efficiency': 40.0,
+        'lifetime': 50000,
         'is_baseline': False
     },
     {
-        'name': 'Smart LED with Motion Sensor',
+        'name': 'SubstiTUBE T8 Motion Sensor 1500 mm 19 W',
         'brand': 'Osram',
-        'price': 45.0,
-        'watt': 15.5,
-        'efficiency': 33.0,
-        'lifetime': 30000,
-        'is_baseline': False
-    },
-    {
-        'name': 'Smart LED Daylight Harvesting',
-        'brand': 'Philips',
-        'price': 55.0,
-        'watt': 15.0,
-        'efficiency': 55.0,
-        'lifetime': 30000,
-        'is_baseline': False
-    },
-    {
-        'name': 'IoT Smart LED (Full Control)',
-        'brand': 'Cree',
-        'price': 65.0,
-        'watt': 14.5,
-        'efficiency': 81.0,
-        'lifetime': 30000,
-        'is_baseline': False
-    },
-    {
-        'name': 'Premium Smart LED Suite',
-        'brand': 'Acuity Brands',
-        'price': 75.0,
-        'watt': 14.0,
+        'price': 49.00,
+        'watt': 19.3,
         'efficiency': 90.0,
-        'lifetime': 30000,
+        'lifetime': 50000,
+        'is_baseline': False
+    },
+    {
+        'name': 'MasterConnect LEDtube 1500 mm 25 W 865 (BT/Zigbee)',
+        'brand': 'Philips',
+        'price': 87.00,
+        'watt': 25.0,
+        'efficiency': 55.0,
+        'lifetime': 60000,
         'is_baseline': False
     }
 ]

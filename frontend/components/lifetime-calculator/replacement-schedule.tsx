@@ -2,7 +2,6 @@
 
 import React from "react"
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
-import { CalendarDays, AlertCircle, CheckCircle } from "lucide-react"
 
 interface LedTube {
     id: number
@@ -102,9 +101,6 @@ export function ReplacementSchedule({
         return schedule
     }, [baseline, installYear, baselineLifetimeYears])
 
-    // Combine and sort schedules
-    const combinedSchedule = [...selectedSchedule, ...baselineSchedule]
-        .sort((a, b) => a.year - b.year)
 
     // Calculate totals over 20 years
     const selectedTotal = selectedSchedule.reduce((sum, item) => sum + item.cost, 0)
@@ -140,7 +136,7 @@ export function ReplacementSchedule({
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Ersatzplan & Umweltbilanz</CardTitle>
+                <CardTitle>Lebensdauer & Umweltbilanz</CardTitle>
                 <CardDescription>
                     Vergleich der Lebensdauer und Umweltauswirkungen über 20 Jahre
                 </CardDescription>
@@ -168,39 +164,6 @@ export function ReplacementSchedule({
                     </div>
                 </div>
 
-                {/* Replacement Schedule */}
-                <div>
-                    <h4 className="font-medium mb-3 flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4" />
-                        Ersatzplan (20 Jahre)
-                    </h4>
-                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                        {combinedSchedule.map((item, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2">
-                                        {item.type === 'installation' && <CheckCircle className="h-4 w-4 text-green-500" />}
-                                        {item.type === 'replacement' && <AlertCircle className="h-4 w-4 text-orange-500" />}
-                                        <span className="font-medium">{item.year}</span>
-                                    </div>
-                                    <div>
-                                        <div className="text-sm">{item.description}</div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {item.cost} CHF
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className={`text-xs px-2 py-1 rounded ${
-                                    item.lampType === 'selected' 
-                                        ? 'bg-blue-100 text-blue-800' 
-                                        : 'bg-gray-100 text-gray-800'
-                                }`}>
-                                    {item.lampType === 'selected' ? 'Gewählt' : 'Standard'}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
 
                 {/* Cost Summary */}
                 <div className="grid grid-cols-2 gap-4">
