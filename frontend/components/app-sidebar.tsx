@@ -33,6 +33,7 @@ const navMain = [
             { title: "Strompreis-Explorer", url: "/tool/strompreise", isActive: true },
             { title: "Amortisations-Rechner", url: "/tool/amortisation" },
             { title: "Szenarien-Vergleich", url: "/tool/szenarien" },
+            { title: "Vorhersage", url: "/tool/vorhersage" },
         ],
     },
 ];

@@ -139,8 +139,8 @@ export default function StrompreisExplorerPage() {
             <div className="space-y-1">
                 <h1 className="text-2xl font-semibold">Strompreis-Explorer</h1>
                 <p className="text-muted-foreground max-w-3xl">
-                    Interaktive Analyse der schweizerischen Strompreise für mittlere
-                    (C2) und grosse (C3) Unternehmen. Datenquelle:&nbsp;
+                    Interaktive Analyse der schweizerischen Strompreise für Kleinbetriebe
+                    (C2: Kleinbetrieb 30&apos;000 kWh/Jahr) und mittlere Betriebe (C3: Mittlerer Betrieb 150&apos;000 kWh/Jahr). Datenquelle:&nbsp;
                     <a
                         href="https://www.strompreis.elcom.admin.ch/"
                         target="_blank"

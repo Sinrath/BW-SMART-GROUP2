@@ -99,12 +99,14 @@ export function FilterPanelAmortisation({
                         onValueChange={v=>onCategoryChange(v as Cat)}
                         className="flex gap-4"
                     >
-                        {["C2","C3"].map(k=>(
-                            <div key={k} className="flex items-center gap-2">
-                                <RadioGroupItem value={k} id={`cat-${k}`}/>
-                                <Label htmlFor={`cat-${k}`}>{k}</Label>
-                            </div>
-                        ))}
+                        <div className="flex items-center gap-2">
+                            <RadioGroupItem value="C2" id="cat-C2"/>
+                            <Label htmlFor="cat-C2">C2: Kleinbetrieb (30&apos;000 kWh/Jahr)</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <RadioGroupItem value="C3" id="cat-C3"/>
+                            <Label htmlFor="cat-C3">C3: Mittlerer Betrieb (150&apos;000 kWh/Jahr)</Label>
+                        </div>
                     </RadioGroup>
                 </div>
 

@@ -87,11 +87,11 @@ export function FilterPanel({
                     >
                         <div className="flex items-center gap-2">
                             <RadioGroupItem value="C2" id="c2" />
-                            <Label htmlFor="c2">C2 – mittel</Label>
+                            <Label htmlFor="c2">C2: Kleinbetrieb (30&apos;000 kWh/Jahr)</Label>
                         </div>
                         <div className="flex items-center gap-2">
                             <RadioGroupItem value="C3" id="c3" />
-                            <Label htmlFor="c3">C3 – gross</Label>
+                            <Label htmlFor="c3">C3: Mittlerer Betrieb (150&apos;000 kWh/Jahr)</Label>
                         </div>
                     </RadioGroup>
                 </div>
