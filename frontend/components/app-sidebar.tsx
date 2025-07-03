@@ -27,13 +27,13 @@ const navMain = [
         ],
     },
     {
-        title: "Amortisationsrechner",
+        title: "Analysen",
         url: "/tool",
         items: [
-            { title: "Strompreis-Explorer", url: "/tool/strompreise", isActive: true },
-            { title: "Amortisations-Rechner", url: "/tool/amortisation" },
-            { title: "Szenarien-Vergleich", url: "/tool/szenarien" },
-            { title: "Vorhersage", url: "/tool/vorhersage" },
+            { title: "Strompreis-Analyse", url: "/tool/strompreise", isActive: true },
+            { title: "LED-Amortisation", url: "/tool/amortisation" },
+            { title: "Szenario-Vergleich", url: "/tool/szenarien" },
+            { title: "Prognose-Rechner", url: "/tool/vorhersage" },
         ],
     },
 ];

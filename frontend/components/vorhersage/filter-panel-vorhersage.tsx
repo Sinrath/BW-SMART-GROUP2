@@ -1,59 +1,183 @@
-'use client'
+"use client"
+import React from "react"
+import {
+    Card, CardHeader, CardContent, CardTitle,
+} from "@/components/ui/card"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { ChevronDown } from "lucide-react"
+import { toast } from "sonner"
+import clsx from "clsx"
 
-import React from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
+import { Cat } from "@/app/types/categories"
+import { LedTube, ElectricityData } from "@/app/services/api"
 
-interface Canton {
-  value: string
-  label: string
-}
+const YEARS = [2025,2026,2027,2028,2029,2030,2031,2032,2033,2034,2035,2036,2037,2038,2039,2040]
 
 interface FilterPanelVorhersageProps {
-  cantons: Canton[]
-  selectedCanton: string
-  selectedCategory: string
-  onCantonChange: (canton: string) => void
-  onCategoryChange: (category: string) => void
+  canton: string
+  onCantonChange: (c: string) => void
+  category: Cat
+  onCategoryChange: (c: Cat) => void
+  lamps: string[]
+  onLampsChange: (l: string[]) => void
+  installYear: number
+  onYearChange: (y: number) => void
+  className?: string
+  availableCantons: Array<{code: string, label: string}>
+  availableLamps: LedTube[]
+  electricityData: ElectricityData
 }
 
 export default function FilterPanelVorhersage({
-  cantons,
-  selectedCanton,
-  selectedCategory,
+  canton,
   onCantonChange,
-  onCategoryChange
+  category,
+  onCategoryChange,
+  lamps,
+  onLampsChange,
+  installYear,
+  onYearChange,
+  className,
+  availableCantons,
+  availableLamps,
+  electricityData,
 }: FilterPanelVorhersageProps) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <div className="space-y-2">
-        <Label htmlFor="canton">Kanton</Label>
-        <Select value={selectedCanton} onValueChange={onCantonChange}>
-          <SelectTrigger id="canton">
-            <SelectValue placeholder="Wählen Sie einen Kanton" />
-          </SelectTrigger>
-          <SelectContent>
-            {cantons.map((canton) => (
-              <SelectItem key={canton.value} value={canton.value}>
-                {canton.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+  const lampList = availableLamps.filter(tube => !tube.isBaseline).map(tube => [
+    tube.name.toLowerCase().replace(/[^a-z]/g, ''),
+    tube
+  ] as [string, LedTube])
+  
+  const validLampIds = lampList.map(([id]) => id)
+  
+  // Clean up invalid lamp IDs from state
+  React.useEffect(() => {
+    const validSelectedLamps = lamps.filter(id => validLampIds.includes(id))
+    if (validSelectedLamps.length !== lamps.length) {
+      console.log('Cleaning up invalid lamp IDs:', lamps, '→', validSelectedLamps)
+      onLampsChange(validSelectedLamps)
+    }
+  }, [validLampIds.join(','), lamps.join(',')]) // eslint-disable-line react-hooks/exhaustive-deps
+  
+  const toggleLamp = (id: string) => {
+    const newLamps = lamps.includes(id) ? lamps.filter(x => x !== id) : [...lamps, id]
+    onLampsChange(newLamps)
+  }
 
-      <div className="space-y-2">
-        <Label htmlFor="category">Kategorie</Label>
-        <Select value={selectedCategory} onValueChange={onCategoryChange}>
-          <SelectTrigger id="category">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="C2">C2: Kleinbetrieb (30&apos;000 kWh/Jahr)</SelectItem>
-            <SelectItem value="C3">C3: Mittlerer Betrieb (150&apos;000 kWh/Jahr)</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+  const selectCanton = (c: string) => {
+    if (!electricityData[c]) { 
+      toast.error(`Für «${c}» keine Daten`)
+      return 
+    }
+    onCantonChange(c)
+  }
+
+  return (
+    <Card className={clsx(className)}>
+      <CardHeader><CardTitle>Filter</CardTitle></CardHeader>
+      <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+        {/* Kanton */}
+        <div className="space-y-1">
+          <Label>Kanton</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-40 justify-between">
+                {canton} <ChevronDown className="ml-2 size-4"/>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 w-40">
+              <ScrollArea className="h-56">
+                {availableCantons.map(canton => (
+                  <div key={canton.code}
+                       className="cursor-pointer px-3 py-1.5 hover:bg-muted/50"
+                       onClick={() => selectCanton(canton.code)}>
+                    {canton.code} - {canton.label}
+                  </div>
+                ))}
+              </ScrollArea>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Kategorie */}
+        <div className="space-y-1">
+          <Label>Kategorie</Label>
+          <RadioGroup
+            value={category}
+            onValueChange={v => onCategoryChange(v as Cat)}
+            className="flex gap-4"
+          >
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="C2" id="cat-C2"/>
+              <Label htmlFor="cat-C2">C2: Kleinbetrieb (30&apos;000 kWh/Jahr)</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="C3" id="cat-C3"/>
+              <Label htmlFor="cat-C3">C3: Mittlerer Betrieb (150&apos;000 kWh/Jahr)</Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        {/* Installationsjahr */}
+        <div className="space-y-1">
+          <Label>Installationsjahr</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-40 justify-between">
+                {installYear} <ChevronDown className="ml-2 size-4"/>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 w-40">
+              {YEARS.map(y => (
+                <div key={y}
+                     className="cursor-pointer px-3 py-1.5 hover:bg-muted/50"
+                     onClick={() => onYearChange(y)}>
+                  {y}
+                </div>
+              ))}
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Smart-Lampen MultiSelect */}
+        <div className="col-span-full space-y-1">
+          <Label>LED-Röhren</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-48 justify-between truncate">
+                {lamps.length
+                  ? lamps.length > 2
+                    ? `${lamps.length} LED-Röhren gewählt`
+                    : lamps.map(id => {
+                        const tube = availableLamps.find(t => t.name.toLowerCase().replace(/[^a-z]/g, '') === id)
+                        return tube ? tube.name.split(" ")[0] : id
+                      }).join(", ")
+                  : "Bitte wählen"}
+                <ChevronDown className="ml-2 size-4"/>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 w-60">
+              <ScrollArea className="h-56">
+                <div className="p-2 space-y-1">
+                  {lampList.map(([id, tube]) => (
+                    <div key={id}
+                         className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted/50 cursor-pointer"
+                         onClick={() => toggleLamp(id)}>
+                      <Checkbox checked={lamps.includes(id)}/>
+                      <span>{tube.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

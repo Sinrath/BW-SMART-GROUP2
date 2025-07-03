@@ -7,10 +7,11 @@ const segmentLabels: Record<string, string> = {
     dokumentation: "Dokumentation",
     disposition: "Disposition",
     arbeit: "Wissenschaftliche Arbeit",
-    tool: "Amortisationsrechner",
-    strompreise: "Strompreis-Explorer",
-    amortisation: "Amortisations-Graf",
-    szenarien: "Szenarien-Vergleich",
+    tool: "Analysen",
+    strompreise: "Strompreis-Analyse",
+    amortisation: "LED-Amortisation",
+    szenarien: "Szenario-Vergleich",
+    vorhersage: "Prognose-Rechner",
 }
 
 export function BreadcrumbPlain() {
