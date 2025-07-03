@@ -11,7 +11,7 @@ import FilterPanelVorhersage from '@/components/vorhersage/filter-panel-vorhersa
 import PredictionChart from '@/components/vorhersage/prediction-chart'
 import PredictionInfoPanel from '@/components/vorhersage/prediction-info-panel'
 import AmortisationChart from '@/components/vorhersage/amortisation-chart'
-import AmortisationInfo from '@/components/vorhersage/amortisation-info'
+import LedCardsWithAmortisation from '@/components/vorhersage/led-cards-with-amortisation'
 
 const LS_KEY = "vorhersage-filter-v1"
 
@@ -153,35 +153,6 @@ export default function VorhersagePage() {
         electricityData={DEMO}
       />
 
-      {/* Strompreis-Vorhersage Chart - Always visible */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Strompreis-Vorhersage – Kanton {selectedCanton}</CardTitle>
-          <CardDescription>
-            Prognosen für die Entwicklung der Strompreise bis 2040 basierend auf Holt-Winters Exponential Smoothing.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading && (
-            <div className="flex items-center justify-center h-[400px]">
-              <p className="text-muted-foreground">Lade Prognosen...</p>
-            </div>
-          )}
-          {!loading && !predictionData && (
-            <div className="flex items-center justify-center h-[400px]">
-              <p className="text-muted-foreground">Keine Prognosedaten verfügbar. Überprüfen Sie die Browser-Konsole.</p>
-            </div>
-          )}
-          {!loading && predictionData && (
-            <PredictionChart
-              data={predictionData}
-              loading={loading}
-            />
-          )}
-          <PredictionInfoPanel />
-        </CardContent>
-      </Card>
-
       {(!selectedLamps.length) && (
         <Alert>
           <TriangleAlert className="h-4 w-4"/>
@@ -191,6 +162,16 @@ export default function VorhersagePage() {
 
       {selectedLamps.length > 0 && (
         <>
+          {/* LED Cards with Amortisation */}
+          <LedCardsWithAmortisation
+            predictionData={predictionData}
+            selectedLamps={selectedLamps}
+            installYear={installYear}
+            scenario={selectedScenario}
+            baseline={baseline}
+            tubes={tubes}
+          />
+
           {/* Kumulative Kosten nur mit Prognose-Daten */}
           <Card>
             <CardHeader>
@@ -226,18 +207,39 @@ export default function VorhersagePage() {
                 baseline={baseline}
                 tubes={tubes}
               />
-              
-              {/* LED Information Cards */}
-              <AmortisationInfo
-                selectedLamps={selectedLamps}
-                baseline={baseline}
-                tubes={tubes}
-                predictionData={predictionData}
-              />
             </CardContent>
           </Card>
         </>
       )}
+
+      {/* Strompreis-Vorhersage Chart - Always visible */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Strompreis-Vorhersage – Kanton {selectedCanton}</CardTitle>
+          <CardDescription>
+            Prognosen für die Entwicklung der Strompreise bis 2040 basierend auf Holt-Winters Exponential Smoothing.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading && (
+            <div className="flex items-center justify-center h-[400px]">
+              <p className="text-muted-foreground">Lade Prognosen...</p>
+            </div>
+          )}
+          {!loading && !predictionData && (
+            <div className="flex items-center justify-center h-[400px]">
+              <p className="text-muted-foreground">Keine Prognosedaten verfügbar. Überprüfen Sie die Browser-Konsole.</p>
+            </div>
+          )}
+          {!loading && predictionData && (
+            <PredictionChart
+              data={predictionData}
+              loading={loading}
+            />
+          )}
+          <PredictionInfoPanel />
+        </CardContent>
+      </Card>
     </div>
   )
 }

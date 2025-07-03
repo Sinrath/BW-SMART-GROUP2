@@ -43,23 +43,26 @@ export function LampCardGrid({
                 ]}
             />
 
-            {lamps.map(l=>(
-                <LampCard
-                    key={l.id}
-                    title={l.label}
-                    rows={[
-                        `Preis: ${l.price} CHF`,
-                        `Leistung: ${l.watt} W (${Math.round(
-                            (1 - l.watt / baseline.watt) * 100,
-                        )}% ggü. LED)`,
-                        `Amortisation: ${
-                            breakEvens[l.id]!==null
-                                ? `${breakEvens[l.id]!.toFixed(1)} J`
-                                : `≥ ${maxYears.toFixed(1)} J`
-                        }`,
-                    ]}
-                />
-            ))}
+            {lamps.map(l=>{
+                const savings = baseline.watt - l.watt
+                const savingsPercent = ((savings / baseline.watt) * 100).toFixed(1)
+                return (
+                    <LampCard
+                        key={l.id}
+                        title={l.label}
+                        rows={[
+                            `Preis: ${l.price} CHF`,
+                            `Leistung: ${l.watt} W`,
+                            `Ersparnis: ${savings}W (${savingsPercent}%)`,
+                            `Amortisation: ${
+                                breakEvens[l.id]!==null
+                                    ? `${breakEvens[l.id]!.toFixed(1)} J`
+                                    : `≥ ${maxYears.toFixed(1)} J`
+                            }`,
+                        ]}
+                    />
+                )
+            })}
         </div>
     )
 }

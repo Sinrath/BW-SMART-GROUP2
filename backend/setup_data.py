@@ -62,6 +62,14 @@ def main():
             "ERROR: app.py not found. Please run this script from the backend directory.")
         sys.exit(1)
 
+    # Check if database already exists
+    db_path = "instance/bw-smart-energy.db"
+    if os.path.exists(db_path):
+        print(f"Database already exists at {db_path}")
+        print("Skipping data setup - using existing database.")
+        print("Backend is ready to serve requests!")
+        return
+
     # Define the setup steps
     setup_steps = [
         ("import_electric_price_data.py",

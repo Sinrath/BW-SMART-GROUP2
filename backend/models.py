@@ -48,6 +48,7 @@ class LedTube(db.Model):
     price = db.Column(db.Float, nullable=False)
     watt = db.Column(db.Float, nullable=False)
     efficiency = db.Column(db.Float, nullable=False)  # 0-100 (percentage more efficient than base)
+    lifetime = db.Column(db.Integer, nullable=False)  # in hours
     is_baseline = db.Column(db.Boolean, default=False)  # True for base LED tube
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -59,6 +60,7 @@ class LedTube(db.Model):
             'price': self.price,
             'watt': self.watt,
             'efficiency': self.efficiency,
+            'lifetime': self.lifetime,
             'isBaseline': self.is_baseline
         }
 

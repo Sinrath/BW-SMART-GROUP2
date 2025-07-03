@@ -10,7 +10,7 @@ COPY . .
 RUN mkdir -p instance
 
 # Import initial data and generate predictions
-# RUN python setup_data.py
+RUN python setup_data.py
 
 EXPOSE 5001
 

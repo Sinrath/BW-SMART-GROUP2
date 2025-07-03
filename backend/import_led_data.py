@@ -9,7 +9,6 @@ from models import LedTube
 # Add the current directory to the Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-
 # LED tube data - Realistic T8 LED tubes with smart features
 LED_TUBES_DATA = [
     {
@@ -17,7 +16,8 @@ LED_TUBES_DATA = [
         'brand': 'Generic',
         'price': 20.0,
         'watt': 18.0,
-        'efficiency': 0.0,  # Baseline = 0% more efficient
+        'efficiency': 0.0,  # Baseline = 0%
+        'lifetime': 50000,  # Lifetime in hours
         'is_baseline': True
     },
     {
@@ -26,6 +26,7 @@ LED_TUBES_DATA = [
         'price': 35.0,
         'watt': 16.0,
         'efficiency': 21.0,
+        'lifetime': 50000,
         'is_baseline': False
     },
     {
@@ -34,6 +35,7 @@ LED_TUBES_DATA = [
         'price': 45.0,
         'watt': 15.5,
         'efficiency': 33.0,
+        'lifetime': 50000,
         'is_baseline': False
     },
     {
@@ -42,6 +44,7 @@ LED_TUBES_DATA = [
         'price': 55.0,
         'watt': 15.0,
         'efficiency': 55.0,
+        'lifetime': 50000,
         'is_baseline': False
     },
     {
@@ -50,6 +53,7 @@ LED_TUBES_DATA = [
         'price': 65.0,
         'watt': 14.5,
         'efficiency': 81.0,
+        'lifetime': 50000,
         'is_baseline': False
     },
     {
@@ -58,6 +62,7 @@ LED_TUBES_DATA = [
         'price': 75.0,
         'watt': 14.0,
         'efficiency': 90.0,
+        'lifetime': 50000,
         'is_baseline': False
     }
 ]
@@ -70,14 +75,10 @@ def import_led_data():
         # Create tables if they don't exist
         db.create_all()
 
-        # Check if data already exists
-        existing_count = LedTube.query.count()
-        if existing_count > 0:
-            print(f"Found {existing_count} existing LED tubes in database.")
-            # Auto-clear for non-interactive mode
-            LedTube.query.delete()
-            db.session.commit()
-            print("Cleared existing LED tube data.")
+        # Clear existing data (fresh start)
+        LedTube.query.delete()
+        db.session.commit()
+        print("Cleared existing LED tube data.")
 
         # Import LED tube data
         imported_count = 0
@@ -90,6 +91,7 @@ def import_led_data():
                     price=tube_data['price'],
                     watt=tube_data['watt'],
                     efficiency=tube_data['efficiency'],
+                    lifetime=tube_data['lifetime'],
                     is_baseline=tube_data['is_baseline']
                 )
 
