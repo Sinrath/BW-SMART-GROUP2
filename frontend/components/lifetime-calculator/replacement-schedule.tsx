@@ -116,9 +116,13 @@ export function ReplacementSchedule({
         const selectedTotalLEDs = selectedSchedule.length // Initial + replacements
         const baselineTotalLEDs = baselineSchedule.length // Initial + replacements
         
-        // Energy consumption over 20 years (continuous operation)
-        const selectedEnergyConsumption = (selectedTube.watt * runtimeHours * analysisYears) / 1000 // kWh
-        const baselineEnergyConsumption = (baseline.watt * runtimeHours * analysisYears) / 1000 // kWh
+        // Apply efficiency reduction for energy consumption calculation
+        const selectedEffectiveWatt = selectedTube.efficiency > 0 ? selectedTube.watt * (1 - selectedTube.efficiency / 100) : selectedTube.watt
+        const baselineEffectiveWatt = baseline.efficiency > 0 ? baseline.watt * (1 - baseline.efficiency / 100) : baseline.watt
+        
+        // Energy consumption over 20 years (continuous operation with efficiency applied)
+        const selectedEnergyConsumption = (selectedEffectiveWatt * runtimeHours * analysisYears) / 1000 // kWh
+        const baselineEnergyConsumption = (baselineEffectiveWatt * runtimeHours * analysisYears) / 1000 // kWh
         
         // CO2 from energy consumption
         const selectedEnergyCO2 = selectedEnergyConsumption * co2PerKWh
