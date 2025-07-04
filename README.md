@@ -37,6 +37,18 @@ The BW-SMART Dashboard provides intelligent analysis tools for:
 - **Data Processing**: Pandas, NumPy
 - **APIs**: REST endpoints for data access
 
+## System Architecture
+
+### Three-Layer Architecture
+- **Presentation Layer**: Next.js frontend with 5 specialized analysis tools
+- **Logic Layer**: Flask REST API with 12 optimized endpoints and business logic
+- **Data Layer**: SQLite database with optimized compound indices on (canton, period, category)
+
+### Data Flow
+```
+ElCom API → Backend Import → SQLite Database → Flask API → Frontend Hooks → React Components → Visualizations
+```
+
 ## Data Sources & Methodology
 
 ### Electricity Price Data
@@ -196,6 +208,54 @@ The BW-SMART Dashboard provides intelligent analysis tools for:
 - **Assumptions**: 
   - 6,000 operating hours per year
   - 0.1 kg CO2 per kWh (Swiss electricity mix estimate)
+
+## Calculation Methodologies
+
+### Core Formulas
+
+#### Historical Cost Analysis
+```
+Jährliche Stromkosten = (Effektive Wattzahl × Betriebsstunden) / 1000 × Strompreis [CHF/kWh]
+Kumulative Kosten = Anschaffungspreis + Σ(Jährliche Stromkosten)
+Break-Even-Point = Schnittpunkt der kumulativen Kostenkurven
+```
+
+#### LED Efficiency Calculation
+```typescript
+const effectiveWatt = tube.watt * (1 - tube.efficiency / 100)
+const savings = baseline.watt - lamp.watt
+const efficiencyPercentage = Math.round((1 - lamp.watt / baseline.watt) * 100)
+```
+
+#### Amortization Calculation
+```typescript
+function interpolate(s0, s1, l0, l1, year0, install) {
+    const d0 = s0 - l0  // Kostendifferenz Jahr 0
+    const d1 = s1 - l1  // Kostendifferenz Jahr 1
+    const t = d0 / (d0 - d1)  // Interpolationsfaktor
+    const xA = year0 + t      // Absolutes Amortisationsjahr
+    return { xA, y: s0 + (s1 - s0) * t, rel: xA - install }
+}
+```
+
+#### CO₂ Impact Calculation
+```typescript
+const co2PerKWh = 0.1  // kg CO₂ per kWh (Swiss electricity mix)
+const manufacturingCO2PerLED = 3.0  // kg CO₂ per LED manufacturing
+const totalCO2 = energyConsumption * co2PerKWh + ledCount * manufacturingCO2PerLED
+```
+
+### Holt-Winters Price Forecasting
+```python
+model = ExponentialSmoothing(
+    ts,
+    trend='add',
+    seasonal=None,
+    damped_trend=True,
+    initialization_method='estimated'
+)
+fit = model.fit(optimized=True, damping_trend=0.8)
+```
 
 ## Data Processing Pipeline
 
