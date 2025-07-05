@@ -14,10 +14,30 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar"
 import { SidebarSectionTitle } from "@/components/SidebarTitle";
-import { Book } from "lucide-react";
+import { Book, Home } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-const navMain = [
+interface NavItem {
+    title: string;
+    url: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    isActive?: boolean;
+}
+
+interface NavSection {
+    title: string;
+    url: string;
+    items: NavItem[];
+}
+
+const navMain: NavSection[] = [
+    {
+        title: "Start",
+        url: "/",
+        items: [
+            { title: "Startseite", url: "/", icon: Home },
+        ],
+    },
     {
         title: "Dokumentation",
         url: "/dokumentation",
@@ -44,7 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname()
 
     return (
-        <Sidebar { ...props }>
+        <Sidebar {...props}>
             <SidebarHeader>
                 <SidebarSectionTitle title="Smart Living Dashboard"
                                      icon={ <Book className="size-4" /> }
@@ -61,10 +81,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <SidebarMenu>
                                 { item.items.map((subItem) => {
                                     const isActive = pathname === subItem.url
+                                    const Icon = subItem.icon
                                     return (
                                         <SidebarMenuItem key={ subItem.title }>
                                             <SidebarMenuButton asChild isActive={ isActive }>
-                                                <a href={ subItem.url }>{ subItem.title }</a>
+                                                <a href={ subItem.url }>
+                                                    { Icon && <Icon className="mr-2 h-4 w-4" /> }
+                                                    { subItem.title }
+                                                </a>
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>
                                     )

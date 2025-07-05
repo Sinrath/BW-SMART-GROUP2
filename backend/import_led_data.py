@@ -21,7 +21,7 @@ LED_TUBES_DATA = [
         'is_baseline': True
     },
     {
-        'name': 'SMART+ WiFi Tube',
+        'name': 'SMART+ LEB Tube',
         'brand': 'Ledvance',
         'price': 24.50,
         'watt': 18.0,

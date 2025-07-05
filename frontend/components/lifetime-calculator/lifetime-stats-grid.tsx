@@ -84,7 +84,7 @@ export function LifetimeStatsGrid({
                         {isSmartLED && (
                             <>
                                 <div>Effizienz: {selectedTube.efficiency}% ({(selectedTube.watt * (1 - selectedTube.efficiency / 100)).toFixed(1)} W)</div>
-                                <div>Ersparnis: {(baseline.watt - selectedTube.watt).toFixed(1)}W (ggü. Standard)</div>
+                                <div>Ersparnis: {(baseline.watt - (selectedTube.watt * (1 - selectedTube.efficiency / 100))).toFixed(1)}W (ggü. Standard)</div>
                             </>
                         )}
                     </div>
