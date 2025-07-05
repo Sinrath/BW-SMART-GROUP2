@@ -121,7 +121,7 @@ export default function Home() {
               <div className="text-gray-400">Kantone analysiert</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">13</div>
+              <div className="text-4xl font-bold mb-2">14</div>
               <div className="text-gray-400">Jahre historische Daten</div>
             </div>
             <div>
